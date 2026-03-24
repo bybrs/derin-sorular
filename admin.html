@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Derin Sorular - Admin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f0a1a;
+      --card-bg: #1a1128;
+      --card-border: #2d1f4e;
+      --accent: #e8a0bf;
+      --text: #f0e6f6;
+      --text-muted: #8b7fa3;
+      --green: #4ecdc4;
+      --red: #ff6b6b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    /* Pin input */
+    .pin-screen {
+      text-align: center;
+    }
+
+    .pin-input {
+      background: transparent;
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1.5rem;
+      color: var(--text);
+      text-align: center;
+      letter-spacing: 8px;
+      width: 200px;
+      outline: none;
+      -webkit-text-security: disc;
+    }
+
+    .pin-input:focus { border-color: var(--accent); }
+
+    .pin-btn {
+      display: block;
+      width: 200px;
+      margin: 16px auto 0;
+      padding: 12px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pin-error {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .toggle-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .toggle {
+      width: 56px;
+      height: 30px;
+      background: var(--card-border);
+      border-radius: 15px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+
+    .toggle.active { background: var(--green); }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .toggle.active::after { transform: translateX(26px); }
+
+    /* Stats */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.85rem;
+    }
+
+    .stat-row:last-child { border: none; }
+    .stat-value { color: var(--accent); font-weight: 600; }
+
+    /* API Key input */
+    .api-input {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-family: monospace;
+      outline: none;
+    }
+
+    .api-input:focus { border-color: var(--accent); }
+
+    .save-btn {
+      margin-top: 10px;
+      padding: 8px 20px;
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .save-btn:hover { background: rgba(232,160,191,0.1); }
+
+    .msg {
+      font-size: 0.75rem;
+      margin-top: 8px;
+      display: none;
+    }
+    .msg.success { color: var(--green); display: block; }
+    .msg.error { color: var(--red); display: block; }
+
+    /* Reset button */
+    .danger-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .danger-btn:hover { background: rgba(255,107,107,0.1); }
+
+    /* Pin change */
+    .pin-change-input {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 0.9rem;
+      text-align: center;
+      letter-spacing: 4px;
+      outline: none;
+    }
+
+    .pin-change-input:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div class="panel pin-screen" id="pinScreen">
+  <h1>Derin Sorular</h1>
+  <div class="card">
+    <input type="password" class="pin-input" id="pinInput" maxlength="8" placeholder="PIN" autofocus
+           onkeydown="if(event.key==='Enter')checkPin()">
+    <button class="pin-btn" onclick="checkPin()">Giris</button>
+    <div class="pin-error" id="pinError">Yanlis PIN</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="panel" id="adminPanel" style="display:none;">
+  <h1>Kontrol Paneli</h1>
+
+  <!-- Game Toggle -->
+  <div class="card">
+    <h2>Oyun Durumu</h2>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Oyun</div>
+        <div class="toggle-status" id="gameStatusText">Kapali</div>
+      </div>
+      <div class="toggle" id="gameToggle" onclick="toggleGame()"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="card">
+    <h2>Istatistikler</h2>
+    <div class="stat-row">
+      <span>Toplam soru</span>
+      <span class="stat-value" id="statTotal">0</span>
+    </div>
+    <div class="stat-row">
+      <span>Begenilen</span>
+      <span class="stat-value" id="statLiked">0</span>
+    </div>
+    <div class="stat-row">
+      <span>Gecilen</span>
+      <span class="stat-value" id="statSkipped">0</span>
+    </div>
+    <div class="stat-row">
+      <span>AI uretilen</span>
+      <span class="stat-value" id="statGenerated">0</span>
+    </div>
+    <div class="stat-row">
+      <span>Favori kategori</span>
+      <span class="stat-value" id="statFavCat">-</span>
+    </div>
+  </div>
+
+  <!-- Gemini API Key -->
+  <div class="card">
+    <h2>Gemini API Key</h2>
+    <input type="password" class="api-input" id="apiKeyInput" placeholder="AIza...">
+    <button class="save-btn" onclick="saveApiKey()">Kaydet</button>
+    <div class="msg" id="apiMsg"></div>
+  </div>
+
+  <!-- Change PIN -->
+  <div class="card">
+    <h2>PIN Degistir</h2>
+    <input type="password" class="pin-change-input" id="newPinInput" placeholder="Yeni PIN" maxlength="8">
+    <button class="save-btn" onclick="changePin()" style="margin-top:10px;">Degistir</button>
+    <div class="msg" id="pinMsg"></div>
+  </div>
+
+  <!-- Reset -->
+  <div class="card">
+    <h2>Sifirla</h2>
+    <button class="danger-btn" onclick="resetHistory()">Soru Gecmisini Sil</button>
+    <div class="msg" id="resetMsg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://joeruseurkgbkupxriqo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_qEjG9pv9hmPTYYZulYgj8g_GrvXE1G_';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CAT_LABELS = {
+  romantic: 'Romantik', fun: 'Eglenceli', deep: 'Derin',
+  bold: 'Cesur', nostalgic: 'Nostaljik', dream: 'Hayal'
+};
+
+let isActive = false;
+
+// ============================================
+// PIN CHECK
+// ============================================
+async function checkPin() {
+  const pin = document.getElementById('pinInput').value;
+  const { data } = await sb.from('game_config').select('admin_pin').eq('id', 1).single();
+
+  if (data && data.admin_pin === pin) {
+    document.getElementById('pinScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadAdmin();
+  } else {
+    const err = document.getElementById('pinError');
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 2000);
+  }
+}
+
+// ============================================
+// LOAD ADMIN DATA
+// ============================================
+async function loadAdmin() {
+  // Game status
+  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key').eq('id', 1).single();
+  isActive = config?.is_active || false;
+  updateToggleUI();
+
+  if (config?.gemini_api_key) {
+    document.getElementById('apiKeyInput').value = config.gemini_api_key;
+  }
+
+  // Stats
+  const { data: interactions } = await sb.from('interactions').select('category, action, source');
+  if (interactions) {
+    const total = interactions.length;
+    const liked = interactions.filter(i => i.action === 'liked').length;
+    const skipped = total - liked;
+    const generated = interactions.filter(i => i.source === 'generated').length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statLiked').textContent = liked;
+    document.getElementById('statSkipped').textContent = skipped;
+    document.getElementById('statGenerated').textContent = generated;
+
+    // Favorite category
+    const catLikes = {};
+    interactions.filter(i => i.action === 'liked').forEach(i => {
+      catLikes[i.category] = (catLikes[i.category] || 0) + 1;
+    });
+    const favCat = Object.entries(catLikes).sort((a, b) => b[1] - a[1])[0];
+    document.getElementById('statFavCat').textContent = favCat ? CAT_LABELS[favCat[0]] || favCat[0] : '-';
+  }
+}
+
+// ============================================
+// TOGGLE GAME
+// ============================================
+async function toggleGame() {
+  isActive = !isActive;
+  await sb.from('game_config').update({ is_active: isActive }).eq('id', 1);
+  updateToggleUI();
+}
+
+function updateToggleUI() {
+  const toggle = document.getElementById('gameToggle');
+  const status = document.getElementById('gameStatusText');
+  if (isActive) {
+    toggle.classList.add('active');
+    status.textContent = 'Aktif';
+    status.style.color = '#4ecdc4';
+  } else {
+    toggle.classList.remove('active');
+    status.textContent = 'Kapali';
+    status.style.color = '';
+  }
+}
+
+// ============================================
+// SAVE API KEY
+// ============================================
+async function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const msg = document.getElementById('apiMsg');
+
+  if (!key) {
+    msg.className = 'msg error';
+    msg.textContent = 'Key bos olamaz';
+    return;
+  }
+
+  await sb.from('game_config').update({ gemini_api_key: key }).eq('id', 1);
+  msg.className = 'msg success';
+  msg.textContent = 'Kaydedildi!';
+  setTimeout(() => msg.className = 'msg', 2000);
+}
+
+// ============================================
+// CHANGE PIN
+// ============================================
+async function changePin() {
+  const newPin = document.getElementById('newPinInput').value.trim();
+  const msg = document.getElementById('pinMsg');
+
+  if (newPin.length < 4) {
+    msg.className = 'msg error';
+    msg.textContent = 'En az 4 karakter';
+    return;
+  }
+
+  await sb.from('game_config').update({ admin_pin: newPin }).eq('id', 1);
+  msg.className = 'msg success';
+  msg.textContent = 'PIN degistirildi!';
+  document.getElementById('newPinInput').value = '';
+  setTimeout(() => msg.className = 'msg', 2000);
+}
+
+// ============================================
+// RESET HISTORY
+// ============================================
+async function resetHistory() {
+  if (!confirm('Tum soru gecmisi silinecek. Emin misin?')) return;
+
+  await sb.from('interactions').delete().neq('id', 0);
+  const msg = document.getElementById('resetMsg');
+  msg.className = 'msg success';
+  msg.textContent = 'Gecmis silindi!';
+  setTimeout(() => { msg.className = 'msg'; loadAdmin(); }, 2000);
+}
+</script>
+</body>
+</html>

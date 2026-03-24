@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Derin Sorular</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f0a1a;
+      --card-bg: #1a1128;
+      --card-border: #2d1f4e;
+      --accent: #e8a0bf;
+      --accent-light: #f0c4d8;
+      --text: #f0e6f6;
+      --text-muted: #8b7fa3;
+      --like: #4ecdc4;
+      --skip: #ff6b6b;
+      --romantic: #e8a0bf;
+      --fun: #ffd93d;
+      --deep: #6c5ce7;
+      --bold: #ff6b6b;
+      --nostalgic: #a29bfe;
+      --dream: #74b9ff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(232,160,191,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(108,92,231,0.06) 0%, transparent 50%);
+      animation: ambientMove 20s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes ambientMove {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-3%, 3%); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .header .subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Category pills */
+    .categories {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 12px 0 20px;
+    }
+
+    .cat-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all 0.3s;
+      opacity: 0.5;
+    }
+
+    .cat-pill.active { opacity: 1; }
+    .cat-pill[data-cat="romantic"] { background: rgba(232,160,191,0.15); border-color: var(--romantic); color: var(--romantic); }
+    .cat-pill[data-cat="fun"] { background: rgba(255,217,61,0.15); border-color: var(--fun); color: var(--fun); }
+    .cat-pill[data-cat="deep"] { background: rgba(108,92,231,0.15); border-color: var(--deep); color: var(--deep); }
+    .cat-pill[data-cat="bold"] { background: rgba(255,107,107,0.15); border-color: var(--bold); color: var(--bold); }
+    .cat-pill[data-cat="nostalgic"] { background: rgba(162,155,254,0.15); border-color: var(--nostalgic); color: var(--nostalgic); }
+    .cat-pill[data-cat="dream"] { background: rgba(116,185,255,0.15); border-color: var(--dream); color: var(--dream); }
+
+    /* Card area */
+    .card-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+      min-height: 320px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 360px;
+      min-height: 280px;
+      background: linear-gradient(145deg, var(--card-bg), #231842);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+      touch-action: pan-y;
+      user-select: none;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(232,160,191,0.05);
+    }
+
+    .card.swiping-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
+    .card.swiping-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
+    .card.entering { animation: cardEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    @keyframes cardEnter {
+      from { transform: scale(0.8) translateY(40px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .card .cat-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card .question-number {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .card .question-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
+    .card .hint {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Action buttons */
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px 0 32px;
+    }
+
+    .action-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .action-btn:active { transform: scale(0.9); }
+
+    .btn-skip {
+      border-color: var(--skip);
+      color: var(--skip);
+    }
+    .btn-skip:hover { background: rgba(255,107,107,0.15); }
+
+    .btn-generate {
+      border-color: var(--accent);
+      color: var(--accent);
+      width: 52px;
+      height: 52px;
+      font-size: 1.2rem;
+    }
+    .btn-generate:hover { background: rgba(232,160,191,0.15); }
+
+    .btn-like {
+      border-color: var(--like);
+      color: var(--like);
+    }
+    .btn-like:hover { background: rgba(78,205,196,0.15); }
+
+    /* Stats bar */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding-bottom: 16px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .stats span { display: flex; align-items: center; gap: 4px; }
+
+    /* Inactive overlay */
+    .inactive-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .inactive-overlay h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .inactive-overlay p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .inactive-overlay .heart {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      animation: heartbeat 2s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.15); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: none;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--card-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .card.generating .question-text { display: none; }
+    .card.generating .loading { display: block; }
+    .card.generating .hint { display: none; }
+    .card.generating .cat-badge { display: none; }
+
+    /* Swipe hint indicators */
+    .swipe-indicator {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .swipe-indicator.left { left: -40px; color: var(--skip); }
+    .swipe-indicator.right { right: -40px; color: var(--like); }
+  </style>
+</head>
+<body>
+
+<div class="inactive-overlay" id="inactiveOverlay" style="display:none;">
+  <div class="heart">&#10084;&#65039;</div>
+  <h2>Derin Sorular</h2>
+  <p>Oyun henuz aktif degil.<br>Biraz sabir, birazdan basliyoruz...</p>
+</div>
+
+<div class="container" id="gameContainer">
+  <div class="header">
+    <h1>Derin Sorular</h1>
+    <div class="subtitle" id="sessionInfo"></div>
+  </div>
+
+  <div class="categories" id="categories">
+    <div class="cat-pill active" data-cat="romantic" onclick="toggleCategory(this)">Romantik</div>
+    <div class="cat-pill active" data-cat="fun" onclick="toggleCategory(this)">Eglenceli</div>
+    <div class="cat-pill active" data-cat="deep" onclick="toggleCategory(this)">Derin</div>
+    <div class="cat-pill active" data-cat="bold" onclick="toggleCategory(this)">Cesur</div>
+    <div class="cat-pill active" data-cat="nostalgic" onclick="toggleCategory(this)">Nostaljik</div>
+    <div class="cat-pill active" data-cat="dream" onclick="toggleCategory(this)">Hayal</div>
+  </div>
+
+  <div class="card-area">
+    <div class="swipe-indicator left">&#10060;</div>
+    <div class="card" id="questionCard">
+      <div class="cat-badge" id="catBadge"></div>
+      <div class="question-number" id="questionNumber"></div>
+      <div class="question-text" id="questionText">Yukleniyor...</div>
+      <div class="hint" id="questionHint"></div>
+      <div class="loading"></div>
+    </div>
+    <div class="swipe-indicator right">&#10084;&#65039;</div>
+  </div>
+
+  <div class="actions">
+    <button class="action-btn btn-skip" onclick="handleAction('skipped')" title="Gec">&#10060;</button>
+    <button class="action-btn btn-generate" onclick="generateQuestion()" title="AI Soru Uret">&#10024;</button>
+    <button class="action-btn btn-like" onclick="handleAction('liked')" title="Begen">&#10084;&#65039;</button>
+  </div>
+
+  <div class="stats">
+    <span>&#10084;&#65039; <span id="likedCount">0</span> begenilen</span>
+    <span>&#128172; <span id="totalCount">0</span> toplam</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================
+// CONFIG - Fill these in!
+// ============================================
+const SUPABASE_URL = 'https://joeruseurkgbkupxriqo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_qEjG9pv9hmPTYYZulYgj8g_GrvXE1G_';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================
+// HARDCODED QUESTIONS
+// ============================================
+const QUESTIONS = [
+  // Romantik
+  { text: "Beni ilk gordugunde aklından ne gecti?", category: "romantic", hint: "Ilk izlenimler her zaman ozeldir" },
+  { text: "Sence iliskimizin en guclu yani ne?", category: "romantic", hint: "Birbirinizi neyle tamamliyorsunuz?" },
+  { text: "Hangi anımız seni en cok mutlu etti?", category: "romantic", hint: "Gozlerini kapat ve hatirla" },
+  { text: "Bana hic yazamadıgın bir mektup olsaydı, ne yazardın?", category: "romantic", hint: "Kelimeler bazen zor gelir" },
+  { text: "Benimle ilgili en cok neyimi ozlersin?", category: "romantic", hint: "Mesafe olsa bile..." },
+  { text: "Seninle en rahat hissettigim an ne zamandı biliyor musun?", category: "romantic", hint: "Huzurun tarifi" },
+  { text: "Benim sana soyledigim hangi soz seni en cok etkiledi?", category: "romantic", hint: "Bazen bir cumle her seyi degistirir" },
+  { text: "Eger bana bir sarki adayacak olsan hangisini secerdin?", category: "romantic", hint: "Muzik ruhun aynasıdır" },
+  { text: "Beni dusundugunde aklına gelen ilk his ne?", category: "romantic", hint: "Hisler kelimelerden once gelir" },
+  { text: "Iliskimizde en cok hangi kuçuk detay seni mutlu ediyor?", category: "romantic", hint: "Kucuk seyler buyuk fark yaratır" },
+  { text: "Birlikte yaslandigimizda nasıl bir hayat hayal ediyorsun?", category: "romantic", hint: "Gelecege birlikte bakmak" },
+  { text: "Sence ask nedir, tek cumlede anlatabilir misin?", category: "romantic", hint: "Herkesin tanımı farklıdır" },
+  { text: "Bana sarılınca ne hissediyorsun?", category: "romantic", hint: "Sarılmak bazen her seyden degerli" },
+  { text: "Benimle gecirdigin en romantik an hangisiydi?", category: "romantic", hint: "Film sahnesi gibi anlar" },
+  { text: "Beni hayatında ne zaman en cok ihtiyac duydun?", category: "romantic", hint: "Bazen varlık en buyuk hediyedir" },
+  { text: "Birbirimize soylemedik bir sey kaldı mı sence?", category: "romantic", hint: "Acıklık iliskiyi buyutur" },
+  { text: "Seni en cok ne zaman sevdigimi hissettin?", category: "romantic", hint: "Hissetmek ile bilmek arasında" },
+
+  // Eglenceli
+  { text: "Eger bir gun boyunca gorunmez olsaydın ne yapardın?", category: "fun", hint: "Sınırsız ozgurluk!" },
+  { text: "Benim en komik huyu ne sence?", category: "fun", hint: "Gulumseyerek dusun" },
+  { text: "Birlikte cildirca bir maceraya atılsak ne yapalım?", category: "fun", hint: "Sınır yok!" },
+  { text: "Beni bir hayvan olarak hayal etsen ne olurdum?", category: "fun", hint: "Yaratıcı ol!" },
+  { text: "Dunyada sadece bir yemek yiyebilsen ne yerdin?", category: "fun", hint: "Zor secim!" },
+  { text: "Eger bir supergucun olsaydi ne olmasını isterdin?", category: "fun", hint: "Hayal gucunu kullan" },
+  { text: "Benim hakkımda kimsenin bilmedigi komik bir sey soyle?", category: "fun", hint: "Sirlar eglencelidir" },
+  { text: "Birlikte bir reality show'a katılsak hangisine gireriz?", category: "fun", hint: "Survivor mı, MasterChef mi?" },
+  { text: "Eger bir gün icinde hayat degistirsek, benin hayatımda ilk ne yapardın?", category: "fun", hint: "Freaky Friday!" },
+  { text: "Benim en garip aliskanlıgım sence ne?", category: "fun", hint: "Herkesin tuhaflıkları var" },
+  { text: "Eger beraber bir YouTube kanali acsak ne hakkında olurdu?", category: "fun", hint: "Icerik uretici modunda" },
+  { text: "Dunya yarın bitecek olsa bugun ne yapalım?", category: "fun", hint: "Son 24 saat!" },
+  { text: "Bana verebilecegin en sacma lakap ne olurdu?", category: "fun", hint: "Ne kadar sacma o kadar iyi" },
+  { text: "Ikimizin beraber yapacagı en epik prank ne olurdu?", category: "fun", hint: "Seytan tuyu" },
+  { text: "Eger ikimiz bir film karakteri olsak kimler olurduk?", category: "fun", hint: "Romantik komedi mi, aksiyon mu?" },
+  { text: "Bir zaman makinen olsa hangi anımıza geri donerdin?", category: "fun", hint: "Tekrar yasamak istedigin an" },
+
+  // Derin
+  { text: "Hayatında en cok pismanlık duydugun sey ne?", category: "deep", hint: "Gecmisle yuzlesmek cesaret ister" },
+  { text: "Seni en cok ne korkutuyor?", category: "deep", hint: "Korkularımız bizi sekillendirr" },
+  { text: "Kendini en yalniz hissettigin an ne zamandı?", category: "deep", hint: "Yalnızlık bazen kalabalıkta olur" },
+  { text: "Hayattan en buyuk beklentin ne?", category: "deep", hint: "Buyuk resme bak" },
+  { text: "Cocuklugundaki hangi ani seni bugunki sen yaptı?", category: "deep", hint: "Kokler derinlerde" },
+  { text: "Hic kimseye soyleyemedıgın bir hayalin var mı?", category: "deep", hint: "Gizli hayaller en guclulerdir" },
+  { text: "Kendinde en cok neyi degistirmek isterdin?", category: "deep", hint: "Ozeleştiri ile ozsevgi arasında" },
+  { text: "Sence mutluluk bir hedef mi yoksa bir yolculuk mu?", category: "deep", hint: "Felsefi dusunme zamani" },
+  { text: "Ailenden aldıgın en degerli ders ne?", category: "deep", hint: "Aile bazen en iyi ogretmendir" },
+  { text: "Eger tum dunyaya tek bir mesaj bırakacak olsan ne derdin?", category: "deep", hint: "Mirasin ne olsun?" },
+  { text: "Hayatında en cok kimi affetmekte zorlandın?", category: "deep", hint: "Affetmek kendini ozgur kılmaktır" },
+  { text: "Olumden korkuyor musun, neden?", category: "deep", hint: "Hayatın en buyuk sorusu" },
+  { text: "Sence insanlar gercekten degisebilir mi?", category: "deep", hint: "Degisim uzerine dusun" },
+  { text: "Hangi duyguyu en cok bastiriyorsun?", category: "deep", hint: "Bastırılan duygular en guclulerdir" },
+  { text: "Eger butun anılarını kaybetsen, hangisini geri isterdin?", category: "deep", hint: "En degerli an" },
+  { text: "Kendini en guclu hissettigin an ne zamandı?", category: "deep", hint: "Guc her zaman fiziksel degildir" },
+
+  // Cesur
+  { text: "Benim hakkımda merak ettigin ama soramadıgın bir sey var mi?", category: "bold", hint: "Simdi tam zamanı" },
+  { text: "Iliskimizde seni en cok rahatsiz eden sey ne?", category: "bold", hint: "Dursuluk iyilestirir" },
+  { text: "Hic benden sıkıldıgın oldu mu?", category: "bold", hint: "Cesur cevaplar icin cesur sorular" },
+  { text: "Baska birinden hoslandigın oldu mu iliskimiz sırasında?", category: "bold", hint: "Dursutluk iliskiyi guclendirir" },
+  { text: "Benim hangi davranışım seni en cok kızdırıyor?", category: "bold", hint: "Yapıcı elestiri zamani" },
+  { text: "Eger bir gun bensiz daha mutlu olacagını dusunsen, ne yapardın?", category: "bold", hint: "Zor bir soru, dusun" },
+  { text: "Hic bana yalan soyleydin mi?", category: "bold", hint: "Dursutluk anı" },
+  { text: "Benimle ilgili degistirmek istedigin bir sey var mı?", category: "bold", hint: "Acık ol" },
+  { text: "Sence iliskimizin en zayif noktasi ne?", category: "bold", hint: "Zayıflıkları bilmek guclendirir" },
+  { text: "Hayatında benden once en cok kimi sevdin?", category: "bold", hint: "Gecmis iliskiler bizi sekillendirir" },
+  { text: "Eger bir gun tartismasiz ayrilsak, beni ne ile hatırlardın?", category: "bold", hint: "Kalıcı izler" },
+  { text: "Sence yeterince ilgi gosteriyor muyum?", category: "bold", hint: "Geribildirim onemli" },
+  { text: "Beni ailenle/arkadaslarınla kıyaslıyor musun bazen?", category: "bold", hint: "Kıyaslama uzerine" },
+  { text: "Iliskimizde en cok neyden vazgectin?", category: "bold", hint: "Fedakarlıklar" },
+
+  // Nostaljik
+  { text: "Cocukken buyuyunce ne olmak istiyordun?", category: "nostalgic", hint: "Cocukluk hayalleri" },
+  { text: "Seni en cok etkileyen cocukluk anin hangisi?", category: "nostalgic", hint: "Hafıza seridine yolculuk" },
+  { text: "Ilk askin kimdi ve nasıl bitti?", category: "nostalgic", hint: "Ilk heyecanlar" },
+  { text: "Cocukken en cok sevdigin oyun neydi?", category: "nostalgic", hint: "O zamanlar her sey daha basitti" },
+  { text: "Hayatında donup tekrar yasamak istedigin bir donem var mi?", category: "nostalgic", hint: "Altın caglar" },
+  { text: "Annen/baban sana hep ne derdi?", category: "nostalgic", hint: "Ebeveyn sozleri kalıcıdır" },
+  { text: "Okul yillarından en cok nyi ozluyorsun?", category: "nostalgic", hint: "Okul gunleri" },
+  { text: "Gecmisine bir mektup yazsaydın, ne derdin?", category: "nostalgic", hint: "Gecmisteki sana tavsiyeler" },
+  { text: "Ilk kalp kırıklıgın nasıl oldu?", category: "nostalgic", hint: "Kırılmak da buyumektir" },
+  { text: "Eski bir arkadasini ozluyor musun? Kim?", category: "nostalgic", hint: "Kaybolan dostluklar" },
+  { text: "Hayatının en unutulmaz yazı hangisiydi?", category: "nostalgic", hint: "Yaz anıları" },
+  { text: "Seni en cok etkileyen ogretmenin kimdi?", category: "nostalgic", hint: "Hayat dersleri" },
+  { text: "Cocukken en cok korktugon sey neydi?", category: "nostalgic", hint: "Cocukluk korkuları" },
+
+  // Hayal
+  { text: "Eger para sorun olmasaydı, nerede yasardın?", category: "dream", hint: "Ruyalar sınırsız" },
+  { text: "Bir yıl boyunca her seyi bırakıp ne yapmak isterdin?", category: "dream", hint: "Ozgurluk senaryosu" },
+  { text: "Gelecekte kendini nerede goruyorsun?", category: "dream", hint: "10 yil sonra" },
+  { text: "Eger bir kitap yazacak olsan ne hakkında olurdu?", category: "dream", hint: "Herkesin bir hikayesi var" },
+  { text: "Ruya evin nasıl olurdu?", category: "dream", hint: "Detaylı hayal kur" },
+  { text: "Eger bir gun her seyi bırakıp gitsek, nereye gideriz?", category: "dream", hint: "Birlikte kacis plani" },
+  { text: "Cocuklarimiz olsa nasil bir ebeveyn olmak isterdin?", category: "dream", hint: "Gelecek nesil" },
+  { text: "Eger bir mucize gerceklescek olsa, ne olmasını isterdin?", category: "dream", hint: "Tek bir dilek" },
+  { text: "Hayalindeki tatil nasıl bir sey?", category: "dream", hint: "Ruya tatili planla" },
+  { text: "Eger butun yeteneklere sahip olsaydın, ne yapardın?", category: "dream", hint: "Sınırsız yetenek" },
+  { text: "Birlikte kurmak istedigin bir is/proje var mi?", category: "dream", hint: "Ortak ruyalar" },
+  { text: "Eger zamanda yolculuk yapabilsen, hangi doneme giderdin?", category: "dream", hint: "Gecmis mi gelecek mi?" },
+  { text: "Hayalindeki yasam temposu nasıl?", category: "dream", hint: "Hızlı mı, sakin mi?" },
+  { text: "Dunyaya bir iz bırakacak olsan, nasıl bir iz olsun?", category: "dream", hint: "Kalıcı miras" },
+];
+
+// ============================================
+// STATE
+// ============================================
+let currentQuestion = null;
+let questionIndex = 0;
+let usedIndices = new Set();
+let likedCount = 0;
+let totalCount = 0;
+let activeCategories = new Set(['romantic', 'fun', 'deep', 'bold', 'nostalgic', 'dream']);
+let categoryWeights = { romantic: 1, fun: 1, deep: 1, bold: 1, nostalgic: 1, dream: 1 };
+let geminiApiKey = null;
+let isGenerating = false;
+
+// ============================================
+// CATEGORY LABELS
+// ============================================
+const CAT_LABELS = {
+  romantic: 'Romantik',
+  fun: 'Eglenceli',
+  deep: 'Derin',
+  bold: 'Cesur',
+  nostalgic: 'Nostaljik',
+  dream: 'Hayal'
+};
+
+// ============================================
+// INIT
+// ============================================
+async function init() {
+  // Check game status
+  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key').eq('id', 1).single();
+
+  if (!config || !config.is_active) {
+    document.getElementById('inactiveOverlay').style.display = 'flex';
+    document.getElementById('gameContainer').style.display = 'none';
+    // Poll every 10 seconds
+    setTimeout(init, 10000);
+    return;
+  }
+
+  document.getElementById('inactiveOverlay').style.display = 'none';
+  document.getElementById('gameContainer').style.display = 'flex';
+  geminiApiKey = config.gemini_api_key;
+
+  // Load interaction history for weights
+  await loadWeights();
+
+  // Show first question
+  nextQuestion();
+  updateStats();
+}
+
+async function loadWeights() {
+  const { data: interactions } = await sb.from('interactions').select('category, action');
+  if (!interactions) return;
+
+  // Count likes per category
+  const likes = {};
+  const total = {};
+  interactions.forEach(i => {
+    total[i.category] = (total[i.category] || 0) + 1;
+    if (i.action === 'liked') likes[i.category] = (likes[i.category] || 0) + 1;
+  });
+
+  totalCount = interactions.length;
+  likedCount = interactions.filter(i => i.action === 'liked').length;
+
+  // Mark used hardcoded questions
+  const usedTexts = new Set(interactions.map(i => i.question_text));
+  QUESTIONS.forEach((q, idx) => {
+    if (usedTexts.has(q.text)) usedIndices.add(idx);
+  });
+
+  // Calculate weights (like ratio + base weight)
+  Object.keys(categoryWeights).forEach(cat => {
+    const t = total[cat] || 0;
+    const l = likes[cat] || 0;
+    if (t > 0) {
+      categoryWeights[cat] = 0.5 + (l / t) * 2; // Range: 0.5 - 2.5
+    }
+  });
+}
+
+// ============================================
+// QUESTION SELECTION
+// ============================================
+function getAvailableQuestions() {
+  return QUESTIONS
+    .map((q, idx) => ({ ...q, idx }))
+    .filter(q => !usedIndices.has(q.idx) && activeCategories.has(q.category));
+}
+
+function weightedRandom(questions) {
+  const weighted = questions.map(q => ({
+    ...q,
+    weight: categoryWeights[q.category] || 1
+  }));
+  const totalWeight = weighted.reduce((sum, q) => sum + q.weight, 0);
+  let r = Math.random() * totalWeight;
+
+  for (const q of weighted) {
+    r -= q.weight;
+    if (r <= 0) return q;
+  }
+  return weighted[weighted.length - 1];
+}
+
+function nextQuestion() {
+  const available = getAvailableQuestions();
+
+  if (available.length === 0) {
+    // All hardcoded questions used, try generating
+    if (geminiApiKey) {
+      generateQuestion();
+    } else {
+      showCard({
+        text: "Tum sorular bitti! AI soru uretmek icin admin panelinden Gemini API key ekle.",
+        category: "deep",
+        hint: "Ya da admin panelinden oyunu sıfırla"
+      }, -1);
+    }
+    return;
+  }
+
+  const q = weightedRandom(available);
+  showCard(q, q.idx);
+}
+
+function showCard(q, idx) {
+  currentQuestion = q;
+  questionIndex = idx;
+
+  const card = document.getElementById('questionCard');
+  const badge = document.getElementById('catBadge');
+
+  card.classList.remove('entering', 'swiping-left', 'swiping-right', 'generating');
+
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('questionHint').textContent = q.hint || '';
+  document.getElementById('questionNumber').textContent = `#${totalCount + 1}`;
+
+  badge.textContent = CAT_LABELS[q.category] || q.category;
+  badge.style.background = `var(--${q.category})`;
+  badge.style.color = '#0f0a1a';
+
+  // Trigger enter animation
+  requestAnimationFrame(() => card.classList.add('entering'));
+}
+
+// ============================================
+// ACTIONS
+// ============================================
+async function handleAction(action) {
+  if (!currentQuestion || isGenerating) return;
+
+  const card = document.getElementById('questionCard');
+  card.classList.add(action === 'liked' ? 'swiping-right' : 'swiping-left');
+
+  // Save interaction
+  if (questionIndex >= 0) usedIndices.add(questionIndex);
+
+  await sb.from('interactions').insert({
+    question_text: currentQuestion.text,
+    category: currentQuestion.category,
+    action: action,
+    source: questionIndex >= 0 ? 'hardcoded' : 'generated'
+  });
+
+  // Update local weights
+  if (action === 'liked') {
+    categoryWeights[currentQuestion.category] = Math.min(3, (categoryWeights[currentQuestion.category] || 1) + 0.2);
+    likedCount++;
+  } else {
+    categoryWeights[currentQuestion.category] = Math.max(0.2, (categoryWeights[currentQuestion.category] || 1) - 0.1);
+  }
+  totalCount++;
+  updateStats();
+
+  // Next question after animation
+  setTimeout(() => nextQuestion(), 400);
+}
+
+function updateStats() {
+  document.getElementById('likedCount').textContent = likedCount;
+  document.getElementById('totalCount').textContent = totalCount;
+}
+
+// ============================================
+// CATEGORY TOGGLE
+// ============================================
+function toggleCategory(el) {
+  const cat = el.dataset.cat;
+  if (activeCategories.has(cat)) {
+    if (activeCategories.size <= 1) return; // At least one category
+    activeCategories.delete(cat);
+    el.classList.remove('active');
+  } else {
+    activeCategories.add(cat);
+    el.classList.add('active');
+  }
+}
+
+// ============================================
+// GEMINI AI GENERATION
+// ============================================
+async function generateQuestion() {
+  if (!geminiApiKey || isGenerating) {
+    if (!geminiApiKey) alert('Gemini API key ayarlanmamis. Admin panelinden ekle.');
+    return;
+  }
+
+  isGenerating = true;
+  const card = document.getElementById('questionCard');
+  card.classList.add('generating');
+
+  // Build context from recent interactions
+  const { data: recent } = await sb
+    .from('interactions')
+    .select('question_text, category, action')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  const likedQuestions = (recent || []).filter(i => i.action === 'liked').map(i => `- ${i.question_text} (${i.category})`);
+  const skippedQuestions = (recent || []).filter(i => i.action === 'skipped').map(i => `- ${i.question_text} (${i.category})`);
+
+  const activeCats = Array.from(activeCategories).map(c => CAT_LABELS[c]).join(', ');
+
+  const prompt = `Sen ciftler icin soru ureten bir asistansın. Turkce sorular uretiyorsun.
+
+Kullanicinin beğendiği sorular:
+${likedQuestions.join('\n') || '(henuz yok)'}
+
+Kullanicinin gectigi sorular:
+${skippedQuestions.join('\n') || '(henuz yok)'}
+
+Aktif kategoriler: ${activeCats}
+
+Begendigi sorulara benzer ama tekrar etmeyen, yaratıcı ve samimi BIR TANE yeni soru uret.
+Cevabını SADECE su JSON formatında ver, baska hicbir sey yazma:
+{"text": "soru metni", "category": "kategori_key", "hint": "kısa ipucu"}
+
+Kategori key'leri: romantic, fun, deep, bold, nostalgic, dream`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.9, maxOutputTokens: 200 }
+      })
+    });
+
+    const data = await res.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Parse JSON from response
+    const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
+    if (jsonMatch) {
+      const q = JSON.parse(jsonMatch[0]);
+      if (q.text && q.category) {
+        isGenerating = false;
+        showCard(q, -1);
+        return;
+      }
+    }
+    throw new Error('Invalid response');
+  } catch (err) {
+    console.error('Gemini error:', err);
+    isGenerating = false;
+    card.classList.remove('generating');
+    // Fallback to hardcoded
+    nextQuestion();
+  }
+}
+
+// ============================================
+// TOUCH SWIPE
+// ============================================
+let touchStartX = 0;
+let touchCurrentX = 0;
+let isSwiping = false;
+
+const card = document.getElementById('questionCard');
+
+card.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  isSwiping = true;
+  card.style.transition = 'none';
+});
+
+card.addEventListener('touchmove', (e) => {
+  if (!isSwiping) return;
+  touchCurrentX = e.touches[0].clientX;
+  const diff = touchCurrentX - touchStartX;
+  card.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
+
+  // Show indicators
+  const leftInd = document.querySelector('.swipe-indicator.left');
+  const rightInd = document.querySelector('.swipe-indicator.right');
+  leftInd.style.opacity = diff < -30 ? Math.min(1, Math.abs(diff) / 100) : 0;
+  rightInd.style.opacity = diff > 30 ? Math.min(1, diff / 100) : 0;
+});
+
+card.addEventListener('touchend', () => {
+  if (!isSwiping) return;
+  isSwiping = false;
+  card.style.transition = '';
+  card.style.transform = '';
+
+  document.querySelector('.swipe-indicator.left').style.opacity = 0;
+  document.querySelector('.swipe-indicator.right').style.opacity = 0;
+
+  const diff = touchCurrentX - touchStartX;
+  if (diff > 80) handleAction('liked');
+  else if (diff < -80) handleAction('skipped');
+});
+
+// ============================================
+// START
+// ============================================
+init();
+</script>
+</body>
+</html>
