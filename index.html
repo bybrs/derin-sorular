@@ -167,6 +167,17 @@
     .card.turn-pink { border-color: var(--pink); box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 30px rgba(232,160,191,0.15); }
     .card.turn-blue { border-color: var(--blue); box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 30px rgba(116,185,255,0.15); }
 
+    /* Stick figure behind card */
+    .card .stick-figure {
+      position: absolute;
+      bottom: 12px;
+      right: 16px;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .card .stick-figure svg { width: 60px; height: 80px; }
+
     .card.swiping-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
     .card.swiping-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
     .card.entering { animation: cardEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -319,11 +330,8 @@
     .btn-pass { border-color: var(--text-muted); color: var(--text-muted); }
     .btn-pass:hover { background: rgba(139,127,163,0.15); }
 
-    .btn-answered-pink { border-color: var(--pink); color: var(--pink); }
-    .btn-answered-pink:hover { background: rgba(232,160,191,0.15); }
-
-    .btn-answered-blue { border-color: var(--blue); color: var(--blue); }
-    .btn-answered-blue:hover { background: rgba(116,185,255,0.15); }
+    .btn-answered { border-color: var(--pink); color: var(--pink); }
+    .btn-answered:hover { background: rgba(232,160,191,0.1); }
 
     .btn-done { border-color: var(--like); color: var(--like); }
     .btn-done:hover { background: rgba(78,205,196,0.15); }
@@ -458,6 +466,8 @@
         <div class="answer-badge ab-pink" id="badgePink"></div>
         <div class="answer-badge ab-blue" id="badgeBlue"></div>
       </div>
+      <!-- Stick figure -->
+      <div class="stick-figure" id="stickFigure" style="display:none;"></div>
       <!-- Edit overlay -->
       <div class="edit-overlay" id="editOverlay">
         <textarea id="editTextarea"></textarea>
@@ -482,19 +492,15 @@
   <div class="actions" id="playActions" style="display:none;">
     <button class="action-btn btn-pass" onclick="playSkip()" title="Simdilik Gec">
       &#10145;&#65039;
-      <span class="btn-label">Gec</span>
+      <span class="btn-label">Simdilik Gec</span>
     </button>
-    <button class="action-btn btn-answered-pink" onclick="playAnswered('pink')" title="Pembe yanitladi">
+    <button class="action-btn btn-answered" id="btnAnswered" onclick="playAnswered(currentTurn)">
       &#10084;&#65039;
-      <span class="btn-label">Pembe</span>
+      <span class="btn-label" id="btnAnsweredLabel">Yanitladim</span>
     </button>
-    <button class="action-btn btn-answered-blue" onclick="playAnswered('blue')" title="Mavi yanitladi">
-      &#128153;
-      <span class="btn-label">Mavi</span>
-    </button>
-    <button class="action-btn btn-done small" onclick="playDone()" title="Ikisi de yanitladi">
+    <button class="action-btn btn-done" onclick="playDone()" title="Bir daha sorma">
       &#10003;
-      <span class="btn-label">Bitti</span>
+      <span class="btn-label">Bir Daha Sorma</span>
     </button>
   </div>
 
@@ -701,26 +707,59 @@ function setupMode() {
   }
 }
 
+// Stick figure SVGs (restroom-style)
+const STICK_GIRL = `<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="30" cy="12" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <line x1="30" y1="22" x2="30" y2="42" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 42 L30 42 L42 42 L36 65 L24 65 Z" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+  <line x1="24" y1="65" x2="22" y2="78" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="36" y1="65" x2="38" y2="78" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="28" x2="14" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="28" x2="46" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>`;
+
+const STICK_BOY = `<svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="30" cy="12" r="10" stroke="currentColor" stroke-width="2.5"/>
+  <line x1="30" y1="22" x2="30" y2="50" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="50" x2="20" y2="78" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="50" x2="40" y2="78" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="28" x2="14" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="28" x2="46" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+</svg>`;
+
 function updateTurnUI() {
   const badge = document.getElementById('modeBadge');
   const turnInd = document.getElementById('turnIndicator');
   const card = document.getElementById('questionCard');
+  const btnAnswered = document.getElementById('btnAnswered');
+  const btnLabel = document.getElementById('btnAnsweredLabel');
+  const stickFigure = document.getElementById('stickFigure');
 
   card.classList.remove('turn-pink', 'turn-blue');
+  stickFigure.style.display = 'block';
 
   if (currentTurn === 'pink') {
-    badge.textContent = 'Pembe\'nin Sirasi';
+    badge.textContent = 'Kiz\'in Sirasi';
     badge.className = 'mode-badge play-pink';
-    turnInd.textContent = '&#10084;&#65039; Pembe yanitliyor';
+    turnInd.innerHTML = '&#10084;&#65039; Kiz yanitliyor';
     turnInd.className = 'turn-indicator pink';
-    turnInd.innerHTML = '&#10084;&#65039; Pembe yanitliyor';
     card.classList.add('turn-pink');
+    btnAnswered.style.borderColor = 'var(--pink)';
+    btnAnswered.style.color = 'var(--pink)';
+    btnLabel.textContent = 'Kiz Yanitladi';
+    stickFigure.innerHTML = STICK_GIRL;
+    stickFigure.style.color = 'var(--pink)';
   } else {
-    badge.textContent = 'Mavi\'nin Sirasi';
+    badge.textContent = 'Erkek\'in Sirasi';
     badge.className = 'mode-badge play-blue';
-    turnInd.innerHTML = '&#128153; Mavi yanitliyor';
+    turnInd.innerHTML = '&#128153; Erkek yanitliyor';
     turnInd.className = 'turn-indicator blue';
     card.classList.add('turn-blue');
+    btnAnswered.style.borderColor = 'var(--blue)';
+    btnAnswered.style.color = 'var(--blue)';
+    btnLabel.textContent = 'Erkek Yanitladi';
+    stickFigure.innerHTML = STICK_BOY;
+    stickFigure.style.color = 'var(--blue)';
   }
 }
 
