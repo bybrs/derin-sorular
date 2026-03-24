@@ -312,7 +312,9 @@
   <!-- Reset -->
   <div class="card">
     <h2>Sifirla</h2>
-    <button class="danger-btn" onclick="resetHistory()">Soru Gecmisini Sil</button>
+    <button class="danger-btn" onclick="resetPlayed()" style="margin-bottom:10px;">Oynanan Isaretlerini Sifirla</button>
+    <div class="msg" id="playedMsg"></div>
+    <button class="danger-btn" onclick="resetHistory()">Tum Gecmisi Sil</button>
     <div class="msg" id="resetMsg"></div>
   </div>
 </div>
@@ -479,6 +481,14 @@ async function changePin() {
 // ============================================
 // RESET HISTORY
 // ============================================
+async function resetPlayed() {
+  await sb.from('interactions').update({ played: false }).eq('played', true);
+  const msg = document.getElementById('playedMsg');
+  msg.className = 'msg success';
+  msg.textContent = 'Tum sorular tekrar oynanabilir!';
+  setTimeout(() => msg.className = 'msg', 2000);
+}
+
 async function resetHistory() {
   if (!confirm('Tum soru gecmisi silinecek. Emin misin?')) return;
 

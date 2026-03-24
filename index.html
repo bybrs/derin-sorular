@@ -457,8 +457,8 @@
   </div>
 
   <div class="stats">
-    <span>&#10084;&#65039; <span id="likedCount">0</span> havuzda</span>
-    <span>&#128172; <span id="totalCount">0</span> toplam</span>
+    <span>&#10084;&#65039; <span id="likedCount">0</span> <span id="statsLabel1">havuzda</span></span>
+    <span>&#128172; <span id="totalCount">0</span> <span id="statsLabel2">toplam</span></span>
   </div>
 </div>
 
@@ -593,7 +593,7 @@ let isEditing = false;
 // Play mode state
 let playPool = [];
 let playIndex = 0;
-let playUsed = new Set();
+let playedTotal = 0;
 
 const CAT_LABELS = {
   romantic: 'Romantik', fun: 'Eglenceli', deep: 'Derin',
@@ -647,11 +647,13 @@ function setupMode() {
     trainActions.style.display = 'none';
     playActions.style.display = 'flex';
     categories.style.display = 'none';
+    document.getElementById('statsLabel1').textContent = 'kalan';
+    document.getElementById('statsLabel2').textContent = 'toplam';
   }
 }
 
 async function loadData() {
-  const { data: interactions } = await sb.from('interactions').select('question_text, category, action, source');
+  const { data: interactions } = await sb.from('interactions').select('id, question_text, category, action, source, played');
   if (!interactions) return;
 
   totalCount = interactions.length;
@@ -677,10 +679,12 @@ async function loadData() {
     if (t > 0) categoryWeights[cat] = 0.5 + (l / t) * 2;
   });
 
-  // Build play pool from liked questions
+  // Build play pool from liked & unplayed questions
   playPool = interactions
-    .filter(i => i.action === 'liked')
-    .map(i => ({ text: i.question_text, category: i.category, hint: '' }));
+    .filter(i => i.action === 'liked' && !i.played)
+    .map(i => ({ id: i.id, text: i.question_text, category: i.category, hint: '' }));
+
+  playedTotal = interactions.filter(i => i.action === 'liked' && i.played).length;
 
   // Shuffle play pool
   for (let i = playPool.length - 1; i > 0; i--) {
@@ -727,28 +731,21 @@ function nextQuestion() {
 // ============================================
 // PLAY MODE
 // ============================================
-function nextPlayQuestion() {
+async function nextPlayQuestion() {
   if (playPool.length === 0) {
-    showCard({ text: "Havuzda henuz soru yok. Once egit modunda soru begenerek havuzu doldur!", category: "romantic", hint: "" }, -1);
+    showCard({ text: "Oynanacak soru kalmadi! Egit modundan yeni sorular ekle.", category: "romantic", hint: "" }, -1);
+    updateStats();
     return;
   }
 
-  // Reset if all used
-  if (playUsed.size >= playPool.length) playUsed.clear();
+  const q = playPool.shift();
 
-  // Find next unused
-  let attempts = 0;
-  while (attempts < playPool.length) {
-    if (!playUsed.has(playIndex)) {
-      playUsed.add(playIndex);
-      const q = playPool[playIndex];
-      showCard(q, -1);
-      playIndex = (playIndex + 1) % playPool.length;
-      return;
-    }
-    playIndex = (playIndex + 1) % playPool.length;
-    attempts++;
-  }
+  // Mark as played immediately
+  sb.from('interactions').update({ played: true }).eq('id', q.id).then(() => {});
+  playedTotal++;
+
+  showCard(q, -1);
+  updateStats();
 }
 
 // ============================================
@@ -841,8 +838,13 @@ function saveEdit() {
 // STATS
 // ============================================
 function updateStats() {
-  document.getElementById('likedCount').textContent = likedCount;
-  document.getElementById('totalCount').textContent = totalCount;
+  if (gameMode === 'train') {
+    document.getElementById('likedCount').textContent = likedCount;
+    document.getElementById('totalCount').textContent = totalCount;
+  } else {
+    document.getElementById('likedCount').textContent = playPool.length;
+    document.getElementById('totalCount').textContent = playedTotal + playPool.length;
+  }
 }
 
 // ============================================
