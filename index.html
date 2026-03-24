@@ -19,6 +19,8 @@
       --text-muted: #8b7fa3;
       --like: #4ecdc4;
       --skip: #ff6b6b;
+      --pink: #e8a0bf;
+      --blue: #74b9ff;
       --romantic: #e8a0bf;
       --fun: #ffd93d;
       --deep: #6c5ce7;
@@ -66,7 +68,6 @@
       padding: 20px;
     }
 
-    /* Header */
     .header { text-align: center; padding: 16px 0; }
 
     .header h1 {
@@ -89,17 +90,21 @@
       letter-spacing: 1.5px;
     }
 
-    .mode-badge.train {
-      background: rgba(255,217,61,0.15);
-      color: var(--fun);
-      border: 1px solid var(--fun);
+    .mode-badge.train { background: rgba(255,217,61,0.15); color: var(--fun); border: 1px solid var(--fun); }
+    .mode-badge.play-pink { background: rgba(232,160,191,0.15); color: var(--pink); border: 1px solid var(--pink); }
+    .mode-badge.play-blue { background: rgba(116,185,255,0.15); color: var(--blue); border: 1px solid var(--blue); }
+
+    /* Turn indicator */
+    .turn-indicator {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 8px 0;
+      display: none;
     }
 
-    .mode-badge.play {
-      background: rgba(78,205,196,0.15);
-      color: var(--like);
-      border: 1px solid var(--like);
-    }
+    .turn-indicator.pink { color: var(--pink); }
+    .turn-indicator.blue { color: var(--blue); }
 
     /* Category pills */
     .categories {
@@ -144,7 +149,7 @@
       max-width: 360px;
       min-height: 280px;
       background: linear-gradient(145deg, var(--card-bg), #231842);
-      border: 1px solid var(--card-border);
+      border: 2px solid var(--card-border);
       border-radius: 24px;
       padding: 40px 28px;
       display: flex;
@@ -153,11 +158,14 @@
       justify-content: center;
       text-align: center;
       position: relative;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s, border-color 0.3s;
       touch-action: pan-y;
       user-select: none;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(232,160,191,0.05);
     }
+
+    .card.turn-pink { border-color: var(--pink); box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 30px rgba(232,160,191,0.15); }
+    .card.turn-blue { border-color: var(--blue); box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 30px rgba(116,185,255,0.15); }
 
     .card.swiping-left { transform: translateX(-120%) rotate(-15deg); opacity: 0; }
     .card.swiping-right { transform: translateX(120%) rotate(15deg); opacity: 0; }
@@ -186,6 +194,24 @@
       color: var(--text-muted);
     }
 
+    /* Answer badges on card (play mode) */
+    .answer-badges {
+      position: absolute;
+      bottom: 16px; right: 16px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .answer-badge {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      opacity: 0.3;
+    }
+
+    .answer-badge.filled { opacity: 1; }
+    .answer-badge.ab-pink { background: var(--pink); }
+    .answer-badge.ab-blue { background: var(--blue); }
+
     .card .question-text {
       font-family: 'Playfair Display', serif;
       font-size: 1.35rem;
@@ -200,7 +226,7 @@
       font-style: italic;
     }
 
-    /* Edit overlay on card */
+    /* Edit overlay */
     .edit-overlay {
       display: none;
       position: absolute;
@@ -248,24 +274,15 @@
       border: 1.5px solid;
     }
 
-    .edit-btn.save {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: var(--bg);
-    }
-
-    .edit-btn.cancel {
-      background: transparent;
-      border-color: var(--text-muted);
-      color: var(--text-muted);
-    }
+    .edit-btn.save { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .edit-btn.cancel { background: transparent; border-color: var(--text-muted); color: var(--text-muted); }
 
     /* Action buttons */
     .actions {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 18px;
+      gap: 14px;
       padding: 24px 0 32px;
     }
 
@@ -298,8 +315,31 @@
     .btn-like { border-color: var(--like); color: var(--like); }
     .btn-like:hover { background: rgba(78,205,196,0.15); }
 
-    .btn-next { border-color: var(--accent); color: var(--accent); }
-    .btn-next:hover { background: rgba(232,160,191,0.15); }
+    /* Play mode buttons */
+    .btn-pass { border-color: var(--text-muted); color: var(--text-muted); }
+    .btn-pass:hover { background: rgba(139,127,163,0.15); }
+
+    .btn-answered-pink { border-color: var(--pink); color: var(--pink); }
+    .btn-answered-pink:hover { background: rgba(232,160,191,0.15); }
+
+    .btn-answered-blue { border-color: var(--blue); color: var(--blue); }
+    .btn-answered-blue:hover { background: rgba(116,185,255,0.15); }
+
+    .btn-done { border-color: var(--like); color: var(--like); }
+    .btn-done:hover { background: rgba(78,205,196,0.15); }
+
+    /* Button labels */
+    .action-btn .btn-label {
+      position: absolute;
+      bottom: -18px;
+      font-size: 0.55rem;
+      font-weight: 500;
+      white-space: nowrap;
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    .action-btn { position: relative; }
 
     /* Stats bar */
     .stats {
@@ -334,11 +374,7 @@
       margin-bottom: 12px;
     }
 
-    .inactive-overlay p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+    .inactive-overlay p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
 
     .inactive-overlay .heart {
       font-size: 3rem;
@@ -353,23 +389,9 @@
       45% { transform: scale(1.1); }
     }
 
-    /* Play mode - empty pool */
-    .empty-pool {
-      text-align: center;
-      padding: 40px 20px;
-    }
-
-    .empty-pool p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    /* Loading spinner */
     .loading {
       display: none;
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       border: 3px solid var(--card-border);
       border-top-color: var(--accent);
       border-radius: 50%;
@@ -383,13 +405,10 @@
     .card.generating .hint { display: none; }
     .card.generating .cat-badge { display: none; }
 
-    /* Swipe indicators */
     .swipe-indicator {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 2rem;
-      opacity: 0;
+      top: 50%; transform: translateY(-50%);
+      font-size: 2rem; opacity: 0;
       transition: opacity 0.2s;
       pointer-events: none;
     }
@@ -413,6 +432,9 @@
     <div class="mode-badge" id="modeBadge"></div>
   </div>
 
+  <!-- Turn indicator (play mode) -->
+  <div class="turn-indicator" id="turnIndicator"></div>
+
   <!-- Categories (train mode only) -->
   <div class="categories" id="categories">
     <div class="cat-pill active" data-cat="romantic" onclick="toggleCategory(this)">Romantik</div>
@@ -431,6 +453,11 @@
       <div class="question-text" id="questionText">Yukleniyor...</div>
       <div class="hint" id="questionHint"></div>
       <div class="loading"></div>
+      <!-- Answer status badges (play mode) -->
+      <div class="answer-badges" id="answerBadges" style="display:none;">
+        <div class="answer-badge ab-pink" id="badgePink"></div>
+        <div class="answer-badge ab-blue" id="badgeBlue"></div>
+      </div>
       <!-- Edit overlay -->
       <div class="edit-overlay" id="editOverlay">
         <textarea id="editTextarea"></textarea>
@@ -453,7 +480,22 @@
 
   <!-- Play mode actions -->
   <div class="actions" id="playActions" style="display:none;">
-    <button class="action-btn btn-next" onclick="nextPlayQuestion()" title="Sonraki">&#10132;</button>
+    <button class="action-btn btn-pass" onclick="playSkip()" title="Simdilik Gec">
+      &#10145;&#65039;
+      <span class="btn-label">Gec</span>
+    </button>
+    <button class="action-btn btn-answered-pink" onclick="playAnswered('pink')" title="Pembe yanitladi">
+      &#10084;&#65039;
+      <span class="btn-label">Pembe</span>
+    </button>
+    <button class="action-btn btn-answered-blue" onclick="playAnswered('blue')" title="Mavi yanitladi">
+      &#128153;
+      <span class="btn-label">Mavi</span>
+    </button>
+    <button class="action-btn btn-done small" onclick="playDone()" title="Ikisi de yanitladi">
+      &#10003;
+      <span class="btn-label">Bitti</span>
+    </button>
   </div>
 
   <div class="stats">
@@ -578,7 +620,7 @@ const QUESTIONS = [
 // ============================================
 // STATE
 // ============================================
-let gameMode = 'train'; // 'train' or 'play'
+let gameMode = 'train';
 let currentQuestion = null;
 let questionIndex = 0;
 let usedIndices = new Set();
@@ -591,9 +633,9 @@ let isGenerating = false;
 let isEditing = false;
 
 // Play mode state
-let playPool = [];
-let playIndex = 0;
-let playedTotal = 0;
+let playPool = [];      // questions available for current turn
+let currentTurn = 'pink'; // 'pink' or 'blue'
+let currentPlayQuestion = null; // current question with DB id & answered_by
 
 const CAT_LABELS = {
   romantic: 'Romantik', fun: 'Eglenceli', deep: 'Derin',
@@ -624,7 +666,7 @@ async function init() {
   if (gameMode === 'train') {
     nextQuestion();
   } else {
-    nextPlayQuestion();
+    showNextPlayQuestion();
   }
   updateStats();
 }
@@ -634,6 +676,8 @@ function setupMode() {
   const trainActions = document.getElementById('trainActions');
   const playActions = document.getElementById('playActions');
   const categories = document.getElementById('categories');
+  const turnInd = document.getElementById('turnIndicator');
+  const answerBadges = document.getElementById('answerBadges');
 
   if (gameMode === 'train') {
     badge.textContent = 'Egit';
@@ -641,19 +685,50 @@ function setupMode() {
     trainActions.style.display = 'flex';
     playActions.style.display = 'none';
     categories.style.display = 'flex';
+    turnInd.style.display = 'none';
+    answerBadges.style.display = 'none';
+    document.getElementById('statsLabel1').textContent = 'havuzda';
+    document.getElementById('statsLabel2').textContent = 'toplam';
   } else {
-    badge.textContent = 'Oyna';
-    badge.className = 'mode-badge play';
     trainActions.style.display = 'none';
     playActions.style.display = 'flex';
     categories.style.display = 'none';
+    turnInd.style.display = 'block';
+    answerBadges.style.display = 'flex';
     document.getElementById('statsLabel1').textContent = 'kalan';
-    document.getElementById('statsLabel2').textContent = 'toplam';
+    document.getElementById('statsLabel2').textContent = 'tamamlanan';
+    updateTurnUI();
   }
 }
 
+function updateTurnUI() {
+  const badge = document.getElementById('modeBadge');
+  const turnInd = document.getElementById('turnIndicator');
+  const card = document.getElementById('questionCard');
+
+  card.classList.remove('turn-pink', 'turn-blue');
+
+  if (currentTurn === 'pink') {
+    badge.textContent = 'Pembe\'nin Sirasi';
+    badge.className = 'mode-badge play-pink';
+    turnInd.textContent = '&#10084;&#65039; Pembe yanitliyor';
+    turnInd.className = 'turn-indicator pink';
+    turnInd.innerHTML = '&#10084;&#65039; Pembe yanitliyor';
+    card.classList.add('turn-pink');
+  } else {
+    badge.textContent = 'Mavi\'nin Sirasi';
+    badge.className = 'mode-badge play-blue';
+    turnInd.innerHTML = '&#128153; Mavi yanitliyor';
+    turnInd.className = 'turn-indicator blue';
+    card.classList.add('turn-blue');
+  }
+}
+
+// ============================================
+// LOAD DATA
+// ============================================
 async function loadData() {
-  const { data: interactions } = await sb.from('interactions').select('id, question_text, category, action, source, played');
+  const { data: interactions } = await sb.from('interactions').select('id, question_text, category, action, source, answered_by');
   if (!interactions) return;
 
   totalCount = interactions.length;
@@ -665,7 +740,7 @@ async function loadData() {
     if (usedTexts.has(q.text)) usedIndices.add(idx);
   });
 
-  // Calculate category weights from likes
+  // Calculate category weights
   const likes = {};
   const totals = {};
   interactions.forEach(i => {
@@ -679,19 +754,147 @@ async function loadData() {
     if (t > 0) categoryWeights[cat] = 0.5 + (l / t) * 2;
   });
 
-  // Build play pool from liked & unplayed questions
+  // Build play pool: liked questions that current turn hasn't fully answered
   playPool = interactions
-    .filter(i => i.action === 'liked' && !i.played)
-    .map(i => ({ id: i.id, text: i.question_text, category: i.category, hint: '' }));
+    .filter(i => i.action === 'liked' && i.answered_by !== 'both')
+    .map(i => ({
+      id: i.id,
+      text: i.question_text,
+      category: i.category,
+      hint: '',
+      answered_by: i.answered_by || null
+    }));
 
-  playedTotal = interactions.filter(i => i.action === 'liked' && i.played).length;
-
-  // Shuffle play pool
+  // Shuffle
   for (let i = playPool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [playPool[i], playPool[j]] = [playPool[j], playPool[i]];
   }
-  playIndex = 0;
+}
+
+// ============================================
+// PLAY MODE
+// ============================================
+function getQuestionsForTurn() {
+  // Return questions that current turn person hasn't answered yet
+  return playPool.filter(q => {
+    if (q.answered_by === 'both') return false;
+    if (q.answered_by === currentTurn) return false;
+    return true;
+  });
+}
+
+function showNextPlayQuestion() {
+  const available = getQuestionsForTurn();
+
+  if (available.length === 0) {
+    // Check if other turn has questions
+    const otherTurn = currentTurn === 'pink' ? 'blue' : 'pink';
+    const otherAvailable = playPool.filter(q => q.answered_by !== 'both' && q.answered_by !== otherTurn);
+
+    if (otherAvailable.length > 0) {
+      currentTurn = otherTurn;
+      updateTurnUI();
+      showNextPlayQuestion();
+      return;
+    }
+
+    currentPlayQuestion = null;
+    document.getElementById('questionCard').classList.remove('turn-pink', 'turn-blue');
+    showCard({ text: "Tum sorular yanitlandi! Egit modundan yeni sorular ekle veya admin'den sifirla.", category: "romantic", hint: "" }, -1);
+    updateStats();
+    return;
+  }
+
+  currentPlayQuestion = available[0];
+  showCard(currentPlayQuestion, -1);
+  updateAnswerBadges();
+  updateStats();
+}
+
+function updateAnswerBadges() {
+  if (!currentPlayQuestion || gameMode !== 'play') return;
+  const ab = currentPlayQuestion.answered_by;
+  document.getElementById('badgePink').className = 'answer-badge ab-pink' + ((ab === 'pink' || ab === 'both') ? ' filled' : '');
+  document.getElementById('badgeBlue').className = 'answer-badge ab-blue' + ((ab === 'blue' || ab === 'both') ? ' filled' : '');
+}
+
+async function playSkip() {
+  if (!currentPlayQuestion) return;
+
+  const card = document.getElementById('questionCard');
+  card.classList.add('swiping-left');
+
+  // Move to end of pool (don't mark anything)
+  const idx = playPool.findIndex(q => q.id === currentPlayQuestion.id);
+  if (idx > -1) {
+    const [item] = playPool.splice(idx, 1);
+    playPool.push(item);
+  }
+
+  // Switch turn
+  currentTurn = currentTurn === 'pink' ? 'blue' : 'pink';
+  updateTurnUI();
+
+  setTimeout(() => showNextPlayQuestion(), 400);
+}
+
+async function playAnswered(who) {
+  if (!currentPlayQuestion) return;
+
+  const card = document.getElementById('questionCard');
+  card.classList.add('swiping-right');
+
+  const q = currentPlayQuestion;
+  let newStatus;
+
+  if (q.answered_by === null) {
+    newStatus = who;
+  } else if (q.answered_by !== who) {
+    newStatus = 'both';
+  } else {
+    // Already answered by this person, skip
+    newStatus = q.answered_by;
+  }
+
+  // Update in DB
+  await sb.from('interactions').update({ answered_by: newStatus }).eq('id', q.id);
+
+  // Update in pool
+  const idx = playPool.findIndex(p => p.id === q.id);
+  if (idx > -1) {
+    if (newStatus === 'both') {
+      playPool.splice(idx, 1);
+    } else {
+      playPool[idx].answered_by = newStatus;
+    }
+  }
+
+  // Switch turn
+  currentTurn = currentTurn === 'pink' ? 'blue' : 'pink';
+  updateTurnUI();
+
+  setTimeout(() => showNextPlayQuestion(), 400);
+}
+
+async function playDone() {
+  if (!currentPlayQuestion) return;
+
+  const card = document.getElementById('questionCard');
+  card.classList.add('swiping-right');
+
+  // Mark as both answered
+  await sb.from('interactions').update({ answered_by: 'both' }).eq('id', currentPlayQuestion.id);
+
+  // Remove from pool
+  const idx = playPool.findIndex(p => p.id === currentPlayQuestion.id);
+  if (idx > -1) playPool.splice(idx, 1);
+
+  // Switch turn
+  currentTurn = currentTurn === 'pink' ? 'blue' : 'pink';
+  updateTurnUI();
+
+  setTimeout(() => showNextPlayQuestion(), 400);
 }
 
 // ============================================
@@ -729,26 +932,6 @@ function nextQuestion() {
 }
 
 // ============================================
-// PLAY MODE
-// ============================================
-async function nextPlayQuestion() {
-  if (playPool.length === 0) {
-    showCard({ text: "Oynanacak soru kalmadi! Egit modundan yeni sorular ekle.", category: "romantic", hint: "" }, -1);
-    updateStats();
-    return;
-  }
-
-  const q = playPool.shift();
-
-  // Mark as played immediately
-  sb.from('interactions').update({ played: true }).eq('id', q.id).then(() => {});
-  playedTotal++;
-
-  showCard(q, -1);
-  updateStats();
-}
-
-// ============================================
 // SHOW CARD
 // ============================================
 function showCard(q, idx) {
@@ -762,9 +945,13 @@ function showCard(q, idx) {
 
   document.getElementById('questionText').textContent = q.text;
   document.getElementById('questionHint').textContent = q.hint || '';
-  document.getElementById('questionNumber').textContent = gameMode === 'train'
-    ? `#${totalCount + 1}`
-    : `${playUsed.size}/${playPool.length}`;
+
+  if (gameMode === 'train') {
+    document.getElementById('questionNumber').textContent = `#${totalCount + 1}`;
+  } else {
+    const remaining = getQuestionsForTurn().length;
+    document.getElementById('questionNumber').textContent = `${remaining} kalan`;
+  }
 
   badge.textContent = CAT_LABELS[q.category] || q.category;
   badge.style.background = `var(--${q.category})`;
@@ -786,18 +973,20 @@ async function handleAction(action) {
 
   const questionText = document.getElementById('questionText').textContent;
 
-  await sb.from('interactions').insert({
+  const { data: inserted } = await sb.from('interactions').insert({
     question_text: questionText,
     category: currentQuestion.category,
     action: action,
     source: questionIndex >= 0 ? 'hardcoded' : 'generated'
-  });
+  }).select('id').single();
 
   if (action === 'liked') {
     categoryWeights[currentQuestion.category] = Math.min(3, (categoryWeights[currentQuestion.category] || 1) + 0.2);
     likedCount++;
-    // Add to play pool live
-    playPool.push({ text: questionText, category: currentQuestion.category, hint: '' });
+    // Add to play pool
+    if (inserted) {
+      playPool.push({ id: inserted.id, text: questionText, category: currentQuestion.category, hint: '', answered_by: null });
+    }
   } else {
     categoryWeights[currentQuestion.category] = Math.max(0.2, (categoryWeights[currentQuestion.category] || 1) - 0.1);
   }
@@ -813,11 +1002,9 @@ async function handleAction(action) {
 function openEdit() {
   if (!currentQuestion || isGenerating) return;
   isEditing = true;
-  const overlay = document.getElementById('editOverlay');
-  const textarea = document.getElementById('editTextarea');
-  textarea.value = document.getElementById('questionText').textContent;
-  overlay.classList.add('active');
-  textarea.focus();
+  document.getElementById('editTextarea').value = document.getElementById('questionText').textContent;
+  document.getElementById('editOverlay').classList.add('active');
+  document.getElementById('editTextarea').focus();
 }
 
 function cancelEdit() {
@@ -827,9 +1014,7 @@ function cancelEdit() {
 
 function saveEdit() {
   const newText = document.getElementById('editTextarea').value.trim();
-  if (newText) {
-    document.getElementById('questionText').textContent = newText;
-  }
+  if (newText) document.getElementById('questionText').textContent = newText;
   isEditing = false;
   document.getElementById('editOverlay').classList.remove('active');
 }
@@ -842,8 +1027,10 @@ function updateStats() {
     document.getElementById('likedCount').textContent = likedCount;
     document.getElementById('totalCount').textContent = totalCount;
   } else {
-    document.getElementById('likedCount').textContent = playPool.length;
-    document.getElementById('totalCount').textContent = playedTotal + playPool.length;
+    const remaining = playPool.filter(q => q.answered_by !== 'both').length;
+    const done = playPool.length === 0 ? likedCount : likedCount - remaining;
+    document.getElementById('likedCount').textContent = remaining;
+    document.getElementById('totalCount').textContent = Math.max(0, done);
   }
 }
 
@@ -872,8 +1059,7 @@ async function generateQuestion() {
   }
 
   isGenerating = true;
-  const card = document.getElementById('questionCard');
-  card.classList.add('generating');
+  document.getElementById('questionCard').classList.add('generating');
 
   const { data: recent } = await sb
     .from('interactions')
@@ -926,7 +1112,7 @@ Kategori key'leri: romantic, fun, deep, bold, nostalgic, dream`;
   } catch (err) {
     console.error('Gemini error:', err);
     isGenerating = false;
-    card.classList.remove('generating');
+    document.getElementById('questionCard').classList.remove('generating');
     nextQuestion();
   }
 }
@@ -952,7 +1138,6 @@ cardEl.addEventListener('touchmove', (e) => {
   touchCurrentX = e.touches[0].clientX;
   const diff = touchCurrentX - touchStartX;
   cardEl.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
-
   document.querySelector('.swipe-indicator.left').style.opacity = diff < -30 ? Math.min(1, Math.abs(diff) / 100) : 0;
   document.querySelector('.swipe-indicator.right').style.opacity = diff > 30 ? Math.min(1, diff / 100) : 0;
 });
@@ -962,10 +1147,8 @@ cardEl.addEventListener('touchend', () => {
   isTouchSwiping = false;
   cardEl.style.transition = '';
   cardEl.style.transform = '';
-
   document.querySelector('.swipe-indicator.left').style.opacity = 0;
   document.querySelector('.swipe-indicator.right').style.opacity = 0;
-
   const diff = touchCurrentX - touchStartX;
   if (diff > 80) handleAction('liked');
   else if (diff < -80) handleAction('skipped');

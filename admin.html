@@ -312,7 +312,7 @@
   <!-- Reset -->
   <div class="card">
     <h2>Sifirla</h2>
-    <button class="danger-btn" onclick="resetPlayed()" style="margin-bottom:10px;">Oynanan Isaretlerini Sifirla</button>
+    <button class="danger-btn" onclick="resetAnswers()" style="margin-bottom:10px;">Yanitlari Sifirla (Tekrar Oyna)</button>
     <div class="msg" id="playedMsg"></div>
     <button class="danger-btn" onclick="resetHistory()">Tum Gecmisi Sil</button>
     <div class="msg" id="resetMsg"></div>
@@ -481,11 +481,11 @@ async function changePin() {
 // ============================================
 // RESET HISTORY
 // ============================================
-async function resetPlayed() {
-  await sb.from('interactions').update({ played: false }).eq('played', true);
+async function resetAnswers() {
+  await sb.from('interactions').update({ answered_by: null }).neq('id', 0);
   const msg = document.getElementById('playedMsg');
   msg.className = 'msg success';
-  msg.textContent = 'Tum sorular tekrar oynanabilir!';
+  msg.textContent = 'Tum yanitlar sifirlandi, tekrar oynayabilirsiniz!';
   setTimeout(() => msg.className = 'msg', 2000);
 }
 
