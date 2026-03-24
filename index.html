@@ -39,14 +39,11 @@
       position: relative;
     }
 
-    /* Ambient background */
     body::before {
       content: '';
       position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
       background: radial-gradient(ellipse at 30% 20%, rgba(232,160,191,0.08) 0%, transparent 50%),
                   radial-gradient(ellipse at 70% 80%, rgba(108,92,231,0.06) 0%, transparent 50%);
       animation: ambientMove 20s ease-in-out infinite;
@@ -70,10 +67,7 @@
     }
 
     /* Header */
-    .header {
-      text-align: center;
-      padding: 16px 0;
-    }
+    .header { text-align: center; padding: 16px 0; }
 
     .header h1 {
       font-family: 'Playfair Display', serif;
@@ -82,13 +76,29 @@
       background: linear-gradient(135deg, var(--accent), var(--accent-light));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: 0.5px;
     }
 
-    .header .subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .mode-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 14px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .mode-badge.train {
+      background: rgba(255,217,61,0.15);
+      color: var(--fun);
+      border: 1px solid var(--fun);
+    }
+
+    .mode-badge.play {
+      background: rgba(78,205,196,0.15);
+      color: var(--like);
+      border: 1px solid var(--like);
     }
 
     /* Category pills */
@@ -160,8 +170,7 @@
 
     .card .cat-badge {
       position: absolute;
-      top: 16px;
-      left: 16px;
+      top: 16px; left: 16px;
       font-size: 0.65rem;
       font-weight: 600;
       padding: 4px 10px;
@@ -172,8 +181,7 @@
 
     .card .question-number {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 16px; right: 16px;
       font-size: 0.65rem;
       color: var(--text-muted);
     }
@@ -192,11 +200,72 @@
       font-style: italic;
     }
 
+    /* Edit overlay on card */
+    .edit-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(15,10,26,0.95);
+      border-radius: 24px;
+      padding: 24px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .edit-overlay.active { display: flex; }
+
+    .edit-overlay textarea {
+      width: 100%;
+      min-height: 120px;
+      background: transparent;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--text);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+    }
+
+    .edit-overlay textarea:focus { border-color: var(--accent); }
+
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .edit-btn {
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid;
+    }
+
+    .edit-btn.save {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .edit-btn.cancel {
+      background: transparent;
+      border-color: var(--text-muted);
+      color: var(--text-muted);
+    }
+
     /* Action buttons */
     .actions {
       display: flex;
       justify-content: center;
-      gap: 24px;
+      align-items: center;
+      gap: 18px;
       padding: 24px 0 32px;
     }
 
@@ -215,27 +284,22 @@
     }
 
     .action-btn:active { transform: scale(0.9); }
+    .action-btn.small { width: 48px; height: 48px; font-size: 1.1rem; }
 
-    .btn-skip {
-      border-color: var(--skip);
-      color: var(--skip);
-    }
+    .btn-skip { border-color: var(--skip); color: var(--skip); }
     .btn-skip:hover { background: rgba(255,107,107,0.15); }
 
-    .btn-generate {
-      border-color: var(--accent);
-      color: var(--accent);
-      width: 52px;
-      height: 52px;
-      font-size: 1.2rem;
-    }
+    .btn-edit { border-color: var(--text-muted); color: var(--text-muted); }
+    .btn-edit:hover { background: rgba(139,127,163,0.15); }
+
+    .btn-generate { border-color: var(--accent); color: var(--accent); }
     .btn-generate:hover { background: rgba(232,160,191,0.15); }
 
-    .btn-like {
-      border-color: var(--like);
-      color: var(--like);
-    }
+    .btn-like { border-color: var(--like); color: var(--like); }
     .btn-like:hover { background: rgba(78,205,196,0.15); }
+
+    .btn-next { border-color: var(--accent); color: var(--accent); }
+    .btn-next:hover { background: rgba(232,160,191,0.15); }
 
     /* Stats bar */
     .stats {
@@ -289,6 +353,18 @@
       45% { transform: scale(1.1); }
     }
 
+    /* Play mode - empty pool */
+    .empty-pool {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-pool p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
     /* Loading spinner */
     .loading {
       display: none;
@@ -307,7 +383,7 @@
     .card.generating .hint { display: none; }
     .card.generating .cat-badge { display: none; }
 
-    /* Swipe hint indicators */
+    /* Swipe indicators */
     .swipe-indicator {
       position: absolute;
       top: 50%;
@@ -323,18 +399,21 @@
 </head>
 <body>
 
+<!-- INACTIVE -->
 <div class="inactive-overlay" id="inactiveOverlay" style="display:none;">
   <div class="heart">&#10084;&#65039;</div>
   <h2>Derin Sorular</h2>
   <p>Oyun henuz aktif degil.<br>Biraz sabir, birazdan basliyoruz...</p>
 </div>
 
+<!-- GAME -->
 <div class="container" id="gameContainer">
   <div class="header">
     <h1>Derin Sorular</h1>
-    <div class="subtitle" id="sessionInfo"></div>
+    <div class="mode-badge" id="modeBadge"></div>
   </div>
 
+  <!-- Categories (train mode only) -->
   <div class="categories" id="categories">
     <div class="cat-pill active" data-cat="romantic" onclick="toggleCategory(this)">Romantik</div>
     <div class="cat-pill active" data-cat="fun" onclick="toggleCategory(this)">Eglenceli</div>
@@ -352,30 +431,41 @@
       <div class="question-text" id="questionText">Yukleniyor...</div>
       <div class="hint" id="questionHint"></div>
       <div class="loading"></div>
+      <!-- Edit overlay -->
+      <div class="edit-overlay" id="editOverlay">
+        <textarea id="editTextarea"></textarea>
+        <div class="edit-actions">
+          <button class="edit-btn cancel" onclick="cancelEdit()">Vazgec</button>
+          <button class="edit-btn save" onclick="saveEdit()">Kaydet</button>
+        </div>
+      </div>
     </div>
     <div class="swipe-indicator right">&#10084;&#65039;</div>
   </div>
 
-  <div class="actions">
+  <!-- Train mode actions -->
+  <div class="actions" id="trainActions">
     <button class="action-btn btn-skip" onclick="handleAction('skipped')" title="Gec">&#10060;</button>
-    <button class="action-btn btn-generate" onclick="generateQuestion()" title="AI Soru Uret">&#10024;</button>
-    <button class="action-btn btn-like" onclick="handleAction('liked')" title="Begen">&#10084;&#65039;</button>
+    <button class="action-btn btn-edit small" onclick="openEdit()" title="Duzenle">&#9998;&#65039;</button>
+    <button class="action-btn btn-generate small" onclick="generateQuestion()" title="AI Soru Uret">&#10024;</button>
+    <button class="action-btn btn-like" onclick="handleAction('liked')" title="Havuza Ekle">&#10084;&#65039;</button>
+  </div>
+
+  <!-- Play mode actions -->
+  <div class="actions" id="playActions" style="display:none;">
+    <button class="action-btn btn-next" onclick="nextPlayQuestion()" title="Sonraki">&#10132;</button>
   </div>
 
   <div class="stats">
-    <span>&#10084;&#65039; <span id="likedCount">0</span> begenilen</span>
+    <span>&#10084;&#65039; <span id="likedCount">0</span> havuzda</span>
     <span>&#128172; <span id="totalCount">0</span> toplam</span>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================================
-// CONFIG - Fill these in!
-// ============================================
 const SUPABASE_URL = 'https://joeruseurkgbkupxriqo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_qEjG9pv9hmPTYYZulYgj8g_GrvXE1G_';
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================
@@ -392,7 +482,7 @@ const QUESTIONS = [
   { text: "Benim sana soyledigim hangi soz seni en cok etkiledi?", category: "romantic", hint: "Bazen bir cumle her seyi degistirir" },
   { text: "Eger bana bir sarki adayacak olsan hangisini secerdin?", category: "romantic", hint: "Muzik ruhun aynasıdır" },
   { text: "Beni dusundugunde aklına gelen ilk his ne?", category: "romantic", hint: "Hisler kelimelerden once gelir" },
-  { text: "Iliskimizde en cok hangi kuçuk detay seni mutlu ediyor?", category: "romantic", hint: "Kucuk seyler buyuk fark yaratır" },
+  { text: "Iliskimizde en cok hangi kucuk detay seni mutlu ediyor?", category: "romantic", hint: "Kucuk seyler buyuk fark yaratır" },
   { text: "Birlikte yaslandigimizda nasıl bir hayat hayal ediyorsun?", category: "romantic", hint: "Gelecege birlikte bakmak" },
   { text: "Sence ask nedir, tek cumlede anlatabilir misin?", category: "romantic", hint: "Herkesin tanımı farklıdır" },
   { text: "Bana sarılınca ne hissediyorsun?", category: "romantic", hint: "Sarılmak bazen her seyden degerli" },
@@ -403,14 +493,14 @@ const QUESTIONS = [
 
   // Eglenceli
   { text: "Eger bir gun boyunca gorunmez olsaydın ne yapardın?", category: "fun", hint: "Sınırsız ozgurluk!" },
-  { text: "Benim en komik huyu ne sence?", category: "fun", hint: "Gulumseyerek dusun" },
+  { text: "Benim en komik huyum ne sence?", category: "fun", hint: "Gulumseyerek dusun" },
   { text: "Birlikte cildirca bir maceraya atılsak ne yapalım?", category: "fun", hint: "Sınır yok!" },
   { text: "Beni bir hayvan olarak hayal etsen ne olurdum?", category: "fun", hint: "Yaratıcı ol!" },
   { text: "Dunyada sadece bir yemek yiyebilsen ne yerdin?", category: "fun", hint: "Zor secim!" },
   { text: "Eger bir supergucun olsaydi ne olmasını isterdin?", category: "fun", hint: "Hayal gucunu kullan" },
   { text: "Benim hakkımda kimsenin bilmedigi komik bir sey soyle?", category: "fun", hint: "Sirlar eglencelidir" },
   { text: "Birlikte bir reality show'a katılsak hangisine gireriz?", category: "fun", hint: "Survivor mı, MasterChef mi?" },
-  { text: "Eger bir gün icinde hayat degistirsek, benin hayatımda ilk ne yapardın?", category: "fun", hint: "Freaky Friday!" },
+  { text: "Eger bir gun icinde hayat degistirsek, benim hayatımda ilk ne yapardın?", category: "fun", hint: "Freaky Friday!" },
   { text: "Benim en garip aliskanlıgım sence ne?", category: "fun", hint: "Herkesin tuhaflıkları var" },
   { text: "Eger beraber bir YouTube kanali acsak ne hakkında olurdu?", category: "fun", hint: "Icerik uretici modunda" },
   { text: "Dunya yarın bitecek olsa bugun ne yapalım?", category: "fun", hint: "Son 24 saat!" },
@@ -421,11 +511,11 @@ const QUESTIONS = [
 
   // Derin
   { text: "Hayatında en cok pismanlık duydugun sey ne?", category: "deep", hint: "Gecmisle yuzlesmek cesaret ister" },
-  { text: "Seni en cok ne korkutuyor?", category: "deep", hint: "Korkularımız bizi sekillendirr" },
+  { text: "Seni en cok ne korkutuyor?", category: "deep", hint: "Korkularımız bizi sekillendirir" },
   { text: "Kendini en yalniz hissettigin an ne zamandı?", category: "deep", hint: "Yalnızlık bazen kalabalıkta olur" },
   { text: "Hayattan en buyuk beklentin ne?", category: "deep", hint: "Buyuk resme bak" },
   { text: "Cocuklugundaki hangi ani seni bugunki sen yaptı?", category: "deep", hint: "Kokler derinlerde" },
-  { text: "Hic kimseye soyleyemedıgın bir hayalin var mı?", category: "deep", hint: "Gizli hayaller en guclulerdir" },
+  { text: "Hic kimseye soyleyemedigin bir hayalin var mı?", category: "deep", hint: "Gizli hayaller en guclulerdir" },
   { text: "Kendinde en cok neyi degistirmek isterdin?", category: "deep", hint: "Ozeleştiri ile ozsevgi arasında" },
   { text: "Sence mutluluk bir hedef mi yoksa bir yolculuk mu?", category: "deep", hint: "Felsefi dusunme zamani" },
   { text: "Ailenden aldıgın en degerli ders ne?", category: "deep", hint: "Aile bazen en iyi ogretmendir" },
@@ -439,12 +529,12 @@ const QUESTIONS = [
 
   // Cesur
   { text: "Benim hakkımda merak ettigin ama soramadıgın bir sey var mi?", category: "bold", hint: "Simdi tam zamanı" },
-  { text: "Iliskimizde seni en cok rahatsiz eden sey ne?", category: "bold", hint: "Dursuluk iyilestirir" },
+  { text: "Iliskimizde seni en cok rahatsiz eden sey ne?", category: "bold", hint: "Durstuluk iyilestirir" },
   { text: "Hic benden sıkıldıgın oldu mu?", category: "bold", hint: "Cesur cevaplar icin cesur sorular" },
-  { text: "Baska birinden hoslandigın oldu mu iliskimiz sırasında?", category: "bold", hint: "Dursutluk iliskiyi guclendirir" },
+  { text: "Baska birinden hoslandigın oldu mu iliskimiz sırasında?", category: "bold", hint: "Durstuluk iliskiyi guclendirir" },
   { text: "Benim hangi davranışım seni en cok kızdırıyor?", category: "bold", hint: "Yapıcı elestiri zamani" },
   { text: "Eger bir gun bensiz daha mutlu olacagını dusunsen, ne yapardın?", category: "bold", hint: "Zor bir soru, dusun" },
-  { text: "Hic bana yalan soyleydin mi?", category: "bold", hint: "Dursutluk anı" },
+  { text: "Hic bana yalan soyleydin mi?", category: "bold", hint: "Durstuluk anı" },
   { text: "Benimle ilgili degistirmek istedigin bir sey var mı?", category: "bold", hint: "Acık ol" },
   { text: "Sence iliskimizin en zayif noktasi ne?", category: "bold", hint: "Zayıflıkları bilmek guclendirir" },
   { text: "Hayatında benden once en cok kimi sevdin?", category: "bold", hint: "Gecmis iliskiler bizi sekillendirir" },
@@ -460,7 +550,7 @@ const QUESTIONS = [
   { text: "Cocukken en cok sevdigin oyun neydi?", category: "nostalgic", hint: "O zamanlar her sey daha basitti" },
   { text: "Hayatında donup tekrar yasamak istedigin bir donem var mi?", category: "nostalgic", hint: "Altın caglar" },
   { text: "Annen/baban sana hep ne derdi?", category: "nostalgic", hint: "Ebeveyn sozleri kalıcıdır" },
-  { text: "Okul yillarından en cok nyi ozluyorsun?", category: "nostalgic", hint: "Okul gunleri" },
+  { text: "Okul yillarından en cok neyi ozluyorsun?", category: "nostalgic", hint: "Okul gunleri" },
   { text: "Gecmisine bir mektup yazsaydın, ne derdin?", category: "nostalgic", hint: "Gecmisteki sana tavsiyeler" },
   { text: "Ilk kalp kırıklıgın nasıl oldu?", category: "nostalgic", hint: "Kırılmak da buyumektir" },
   { text: "Eski bir arkadasini ozluyor musun? Kim?", category: "nostalgic", hint: "Kaybolan dostluklar" },
@@ -488,6 +578,7 @@ const QUESTIONS = [
 // ============================================
 // STATE
 // ============================================
+let gameMode = 'train'; // 'train' or 'play'
 let currentQuestion = null;
 let questionIndex = 0;
 let usedIndices = new Set();
@@ -497,30 +588,27 @@ let activeCategories = new Set(['romantic', 'fun', 'deep', 'bold', 'nostalgic', 
 let categoryWeights = { romantic: 1, fun: 1, deep: 1, bold: 1, nostalgic: 1, dream: 1 };
 let geminiApiKey = null;
 let isGenerating = false;
+let isEditing = false;
 
-// ============================================
-// CATEGORY LABELS
-// ============================================
+// Play mode state
+let playPool = [];
+let playIndex = 0;
+let playUsed = new Set();
+
 const CAT_LABELS = {
-  romantic: 'Romantik',
-  fun: 'Eglenceli',
-  deep: 'Derin',
-  bold: 'Cesur',
-  nostalgic: 'Nostaljik',
-  dream: 'Hayal'
+  romantic: 'Romantik', fun: 'Eglenceli', deep: 'Derin',
+  bold: 'Cesur', nostalgic: 'Nostaljik', dream: 'Hayal'
 };
 
 // ============================================
 // INIT
 // ============================================
 async function init() {
-  // Check game status
-  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key').eq('id', 1).single();
+  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key, game_mode').eq('id', 1).single();
 
   if (!config || !config.is_active) {
     document.getElementById('inactiveOverlay').style.display = 'flex';
     document.getElementById('gameContainer').style.display = 'none';
-    // Poll every 10 seconds
     setTimeout(init, 10000);
     return;
   }
@@ -528,48 +616,82 @@ async function init() {
   document.getElementById('inactiveOverlay').style.display = 'none';
   document.getElementById('gameContainer').style.display = 'flex';
   geminiApiKey = config.gemini_api_key;
+  gameMode = config.game_mode || 'train';
 
-  // Load interaction history for weights
-  await loadWeights();
+  setupMode();
+  await loadData();
 
-  // Show first question
-  nextQuestion();
+  if (gameMode === 'train') {
+    nextQuestion();
+  } else {
+    nextPlayQuestion();
+  }
   updateStats();
 }
 
-async function loadWeights() {
-  const { data: interactions } = await sb.from('interactions').select('category, action');
-  if (!interactions) return;
+function setupMode() {
+  const badge = document.getElementById('modeBadge');
+  const trainActions = document.getElementById('trainActions');
+  const playActions = document.getElementById('playActions');
+  const categories = document.getElementById('categories');
 
-  // Count likes per category
-  const likes = {};
-  const total = {};
-  interactions.forEach(i => {
-    total[i.category] = (total[i.category] || 0) + 1;
-    if (i.action === 'liked') likes[i.category] = (likes[i.category] || 0) + 1;
-  });
+  if (gameMode === 'train') {
+    badge.textContent = 'Egit';
+    badge.className = 'mode-badge train';
+    trainActions.style.display = 'flex';
+    playActions.style.display = 'none';
+    categories.style.display = 'flex';
+  } else {
+    badge.textContent = 'Oyna';
+    badge.className = 'mode-badge play';
+    trainActions.style.display = 'none';
+    playActions.style.display = 'flex';
+    categories.style.display = 'none';
+  }
+}
+
+async function loadData() {
+  const { data: interactions } = await sb.from('interactions').select('question_text, category, action, source');
+  if (!interactions) return;
 
   totalCount = interactions.length;
   likedCount = interactions.filter(i => i.action === 'liked').length;
 
-  // Mark used hardcoded questions
+  // Mark used hardcoded questions (for train mode)
   const usedTexts = new Set(interactions.map(i => i.question_text));
   QUESTIONS.forEach((q, idx) => {
     if (usedTexts.has(q.text)) usedIndices.add(idx);
   });
 
-  // Calculate weights (like ratio + base weight)
-  Object.keys(categoryWeights).forEach(cat => {
-    const t = total[cat] || 0;
-    const l = likes[cat] || 0;
-    if (t > 0) {
-      categoryWeights[cat] = 0.5 + (l / t) * 2; // Range: 0.5 - 2.5
-    }
+  // Calculate category weights from likes
+  const likes = {};
+  const totals = {};
+  interactions.forEach(i => {
+    totals[i.category] = (totals[i.category] || 0) + 1;
+    if (i.action === 'liked') likes[i.category] = (likes[i.category] || 0) + 1;
   });
+
+  Object.keys(categoryWeights).forEach(cat => {
+    const t = totals[cat] || 0;
+    const l = likes[cat] || 0;
+    if (t > 0) categoryWeights[cat] = 0.5 + (l / t) * 2;
+  });
+
+  // Build play pool from liked questions
+  playPool = interactions
+    .filter(i => i.action === 'liked')
+    .map(i => ({ text: i.question_text, category: i.category, hint: '' }));
+
+  // Shuffle play pool
+  for (let i = playPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [playPool[i], playPool[j]] = [playPool[j], playPool[i]];
+  }
+  playIndex = 0;
 }
 
 // ============================================
-// QUESTION SELECTION
+// TRAIN MODE - QUESTION SELECTION
 // ============================================
 function getAvailableQuestions() {
   return QUESTIONS
@@ -578,13 +700,9 @@ function getAvailableQuestions() {
 }
 
 function weightedRandom(questions) {
-  const weighted = questions.map(q => ({
-    ...q,
-    weight: categoryWeights[q.category] || 1
-  }));
+  const weighted = questions.map(q => ({ ...q, weight: categoryWeights[q.category] || 1 }));
   const totalWeight = weighted.reduce((sum, q) => sum + q.weight, 0);
   let r = Math.random() * totalWeight;
-
   for (const q of weighted) {
     r -= q.weight;
     if (r <= 0) return q;
@@ -594,25 +712,48 @@ function weightedRandom(questions) {
 
 function nextQuestion() {
   const available = getAvailableQuestions();
-
   if (available.length === 0) {
-    // All hardcoded questions used, try generating
     if (geminiApiKey) {
       generateQuestion();
     } else {
-      showCard({
-        text: "Tum sorular bitti! AI soru uretmek icin admin panelinden Gemini API key ekle.",
-        category: "deep",
-        hint: "Ya da admin panelinden oyunu sıfırla"
-      }, -1);
+      showCard({ text: "Tum sorular bitti! AI soru uretmek icin admin panelinden Gemini API key ekle.", category: "deep", hint: "" }, -1);
     }
     return;
   }
-
   const q = weightedRandom(available);
   showCard(q, q.idx);
 }
 
+// ============================================
+// PLAY MODE
+// ============================================
+function nextPlayQuestion() {
+  if (playPool.length === 0) {
+    showCard({ text: "Havuzda henuz soru yok. Once egit modunda soru begenerek havuzu doldur!", category: "romantic", hint: "" }, -1);
+    return;
+  }
+
+  // Reset if all used
+  if (playUsed.size >= playPool.length) playUsed.clear();
+
+  // Find next unused
+  let attempts = 0;
+  while (attempts < playPool.length) {
+    if (!playUsed.has(playIndex)) {
+      playUsed.add(playIndex);
+      const q = playPool[playIndex];
+      showCard(q, -1);
+      playIndex = (playIndex + 1) % playPool.length;
+      return;
+    }
+    playIndex = (playIndex + 1) % playPool.length;
+    attempts++;
+  }
+}
+
+// ============================================
+// SHOW CARD
+// ============================================
 function showCard(q, idx) {
   currentQuestion = q;
   questionIndex = idx;
@@ -624,49 +765,81 @@ function showCard(q, idx) {
 
   document.getElementById('questionText').textContent = q.text;
   document.getElementById('questionHint').textContent = q.hint || '';
-  document.getElementById('questionNumber').textContent = `#${totalCount + 1}`;
+  document.getElementById('questionNumber').textContent = gameMode === 'train'
+    ? `#${totalCount + 1}`
+    : `${playUsed.size}/${playPool.length}`;
 
   badge.textContent = CAT_LABELS[q.category] || q.category;
   badge.style.background = `var(--${q.category})`;
   badge.style.color = '#0f0a1a';
 
-  // Trigger enter animation
   requestAnimationFrame(() => card.classList.add('entering'));
 }
 
 // ============================================
-// ACTIONS
+// TRAIN MODE ACTIONS
 // ============================================
 async function handleAction(action) {
-  if (!currentQuestion || isGenerating) return;
+  if (!currentQuestion || isGenerating || isEditing) return;
 
   const card = document.getElementById('questionCard');
   card.classList.add(action === 'liked' ? 'swiping-right' : 'swiping-left');
 
-  // Save interaction
   if (questionIndex >= 0) usedIndices.add(questionIndex);
 
+  const questionText = document.getElementById('questionText').textContent;
+
   await sb.from('interactions').insert({
-    question_text: currentQuestion.text,
+    question_text: questionText,
     category: currentQuestion.category,
     action: action,
     source: questionIndex >= 0 ? 'hardcoded' : 'generated'
   });
 
-  // Update local weights
   if (action === 'liked') {
     categoryWeights[currentQuestion.category] = Math.min(3, (categoryWeights[currentQuestion.category] || 1) + 0.2);
     likedCount++;
+    // Add to play pool live
+    playPool.push({ text: questionText, category: currentQuestion.category, hint: '' });
   } else {
     categoryWeights[currentQuestion.category] = Math.max(0.2, (categoryWeights[currentQuestion.category] || 1) - 0.1);
   }
   totalCount++;
   updateStats();
 
-  // Next question after animation
   setTimeout(() => nextQuestion(), 400);
 }
 
+// ============================================
+// EDIT
+// ============================================
+function openEdit() {
+  if (!currentQuestion || isGenerating) return;
+  isEditing = true;
+  const overlay = document.getElementById('editOverlay');
+  const textarea = document.getElementById('editTextarea');
+  textarea.value = document.getElementById('questionText').textContent;
+  overlay.classList.add('active');
+  textarea.focus();
+}
+
+function cancelEdit() {
+  isEditing = false;
+  document.getElementById('editOverlay').classList.remove('active');
+}
+
+function saveEdit() {
+  const newText = document.getElementById('editTextarea').value.trim();
+  if (newText) {
+    document.getElementById('questionText').textContent = newText;
+  }
+  isEditing = false;
+  document.getElementById('editOverlay').classList.remove('active');
+}
+
+// ============================================
+// STATS
+// ============================================
 function updateStats() {
   document.getElementById('likedCount').textContent = likedCount;
   document.getElementById('totalCount').textContent = totalCount;
@@ -678,7 +851,7 @@ function updateStats() {
 function toggleCategory(el) {
   const cat = el.dataset.cat;
   if (activeCategories.has(cat)) {
-    if (activeCategories.size <= 1) return; // At least one category
+    if (activeCategories.size <= 1) return;
     activeCategories.delete(cat);
     el.classList.remove('active');
   } else {
@@ -700,25 +873,23 @@ async function generateQuestion() {
   const card = document.getElementById('questionCard');
   card.classList.add('generating');
 
-  // Build context from recent interactions
   const { data: recent } = await sb
     .from('interactions')
     .select('question_text, category, action')
     .order('created_at', { ascending: false })
     .limit(20);
 
-  const likedQuestions = (recent || []).filter(i => i.action === 'liked').map(i => `- ${i.question_text} (${i.category})`);
-  const skippedQuestions = (recent || []).filter(i => i.action === 'skipped').map(i => `- ${i.question_text} (${i.category})`);
-
+  const likedQs = (recent || []).filter(i => i.action === 'liked').map(i => `- ${i.question_text} (${i.category})`);
+  const skippedQs = (recent || []).filter(i => i.action === 'skipped').map(i => `- ${i.question_text} (${i.category})`);
   const activeCats = Array.from(activeCategories).map(c => CAT_LABELS[c]).join(', ');
 
   const prompt = `Sen ciftler icin soru ureten bir asistansın. Turkce sorular uretiyorsun.
 
 Kullanicinin beğendiği sorular:
-${likedQuestions.join('\n') || '(henuz yok)'}
+${likedQs.join('\n') || '(henuz yok)'}
 
 Kullanicinin gectigi sorular:
-${skippedQuestions.join('\n') || '(henuz yok)'}
+${skippedQs.join('\n') || '(henuz yok)'}
 
 Aktif kategoriler: ${activeCats}
 
@@ -740,8 +911,6 @@ Kategori key'leri: romantic, fun, deep, bold, nostalgic, dream`;
 
     const data = await res.json();
     const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    // Parse JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
     if (jsonMatch) {
       const q = JSON.parse(jsonMatch[0]);
@@ -756,44 +925,41 @@ Kategori key'leri: romantic, fun, deep, bold, nostalgic, dream`;
     console.error('Gemini error:', err);
     isGenerating = false;
     card.classList.remove('generating');
-    // Fallback to hardcoded
     nextQuestion();
   }
 }
 
 // ============================================
-// TOUCH SWIPE
+// TOUCH SWIPE (train mode only)
 // ============================================
 let touchStartX = 0;
 let touchCurrentX = 0;
-let isSwiping = false;
+let isTouchSwiping = false;
 
-const card = document.getElementById('questionCard');
+const cardEl = document.getElementById('questionCard');
 
-card.addEventListener('touchstart', (e) => {
+cardEl.addEventListener('touchstart', (e) => {
+  if (gameMode !== 'train' || isEditing) return;
   touchStartX = e.touches[0].clientX;
-  isSwiping = true;
-  card.style.transition = 'none';
+  isTouchSwiping = true;
+  cardEl.style.transition = 'none';
 });
 
-card.addEventListener('touchmove', (e) => {
-  if (!isSwiping) return;
+cardEl.addEventListener('touchmove', (e) => {
+  if (!isTouchSwiping || gameMode !== 'train') return;
   touchCurrentX = e.touches[0].clientX;
   const diff = touchCurrentX - touchStartX;
-  card.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
+  cardEl.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
 
-  // Show indicators
-  const leftInd = document.querySelector('.swipe-indicator.left');
-  const rightInd = document.querySelector('.swipe-indicator.right');
-  leftInd.style.opacity = diff < -30 ? Math.min(1, Math.abs(diff) / 100) : 0;
-  rightInd.style.opacity = diff > 30 ? Math.min(1, diff / 100) : 0;
+  document.querySelector('.swipe-indicator.left').style.opacity = diff < -30 ? Math.min(1, Math.abs(diff) / 100) : 0;
+  document.querySelector('.swipe-indicator.right').style.opacity = diff > 30 ? Math.min(1, diff / 100) : 0;
 });
 
-card.addEventListener('touchend', () => {
-  if (!isSwiping) return;
-  isSwiping = false;
-  card.style.transition = '';
-  card.style.transform = '';
+cardEl.addEventListener('touchend', () => {
+  if (!isTouchSwiping || gameMode !== 'train') return;
+  isTouchSwiping = false;
+  cardEl.style.transition = '';
+  cardEl.style.transform = '';
 
   document.querySelector('.swipe-indicator.left').style.opacity = 0;
   document.querySelector('.swipe-indicator.right').style.opacity = 0;

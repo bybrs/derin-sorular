@@ -256,6 +256,18 @@
     </div>
   </div>
 
+  <!-- Game Mode -->
+  <div class="card">
+    <h2>Mod</h2>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label" id="modeLabel">Egit</div>
+        <div class="toggle-status" id="modeDesc">Soru secme ve havuz olusturma</div>
+      </div>
+      <div class="toggle" id="modeToggle" onclick="toggleMode()"></div>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="card">
     <h2>Istatistikler</h2>
@@ -318,6 +330,7 @@ const CAT_LABELS = {
 };
 
 let isActive = false;
+let gameMode = 'train';
 
 // ============================================
 // PIN CHECK
@@ -342,9 +355,11 @@ async function checkPin() {
 // ============================================
 async function loadAdmin() {
   // Game status
-  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key').eq('id', 1).single();
+  const { data: config } = await sb.from('game_config').select('is_active, gemini_api_key, game_mode').eq('id', 1).single();
   isActive = config?.is_active || false;
+  gameMode = config?.game_mode || 'train';
   updateToggleUI();
+  updateModeUI();
 
   if (config?.gemini_api_key) {
     document.getElementById('apiKeyInput').value = config.gemini_api_key;
@@ -393,6 +408,32 @@ function updateToggleUI() {
     toggle.classList.remove('active');
     status.textContent = 'Kapali';
     status.style.color = '';
+  }
+}
+
+// ============================================
+// TOGGLE MODE
+// ============================================
+async function toggleMode() {
+  gameMode = gameMode === 'train' ? 'play' : 'train';
+  await sb.from('game_config').update({ game_mode: gameMode }).eq('id', 1);
+  updateModeUI();
+}
+
+function updateModeUI() {
+  const toggle = document.getElementById('modeToggle');
+  const label = document.getElementById('modeLabel');
+  const desc = document.getElementById('modeDesc');
+  if (gameMode === 'play') {
+    toggle.classList.add('active');
+    label.textContent = 'Oyna';
+    desc.textContent = 'Havuzdaki sorularla oyna';
+    desc.style.color = '#4ecdc4';
+  } else {
+    toggle.classList.remove('active');
+    label.textContent = 'Egit';
+    desc.textContent = 'Soru secme ve havuz olusturma';
+    desc.style.color = '';
   }
 }
 
