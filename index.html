@@ -880,16 +880,12 @@ async function playSkip() {
   const card = document.getElementById('questionCard');
   card.classList.add('swiping-left');
 
-  // Move to end of pool (don't mark anything)
+  // Move to end of pool (don't mark anything), stay on same turn
   const idx = playPool.findIndex(q => q.id === currentPlayQuestion.id);
   if (idx > -1) {
     const [item] = playPool.splice(idx, 1);
     playPool.push(item);
   }
-
-  // Switch turn
-  currentTurn = currentTurn === 'pink' ? 'blue' : 'pink';
-  updateTurnUI();
 
   setTimeout(() => showNextPlayQuestion(), 400);
 }
