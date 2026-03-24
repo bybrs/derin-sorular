@@ -235,8 +235,8 @@
   <div class="card">
     <input type="password" class="pin-input" id="pinInput" maxlength="8" placeholder="PIN" autofocus
            onkeydown="if(event.key==='Enter')checkPin()">
-    <button class="pin-btn" onclick="checkPin()">Giris</button>
-    <div class="pin-error" id="pinError">Yanlis PIN</div>
+    <button class="pin-btn" onclick="checkPin()">Giriş</button>
+    <div class="pin-error" id="pinError">Yanlış PIN</div>
   </div>
 </div>
 
@@ -250,7 +250,7 @@
     <div class="toggle-row">
       <div>
         <div class="toggle-label">Oyun</div>
-        <div class="toggle-status" id="gameStatusText">Kapali</div>
+        <div class="toggle-status" id="gameStatusText">Kapalı</div>
       </div>
       <div class="toggle" id="gameToggle" onclick="toggleGame()"></div>
     </div>
@@ -261,8 +261,8 @@
     <h2>Mod</h2>
     <div class="toggle-row">
       <div>
-        <div class="toggle-label" id="modeLabel">Egit</div>
-        <div class="toggle-status" id="modeDesc">Soru secme ve havuz olusturma</div>
+        <div class="toggle-label" id="modeLabel">Eğit</div>
+        <div class="toggle-status" id="modeDesc">Soru seçme ve havuz oluşturma</div>
       </div>
       <div class="toggle" id="modeToggle" onclick="toggleMode()"></div>
     </div>
@@ -270,21 +270,21 @@
 
   <!-- Stats -->
   <div class="card">
-    <h2>Istatistikler</h2>
+    <h2>İstatistikler</h2>
     <div class="stat-row">
       <span>Toplam soru</span>
       <span class="stat-value" id="statTotal">0</span>
     </div>
     <div class="stat-row">
-      <span>Begenilen</span>
+      <span>Beğenilen</span>
       <span class="stat-value" id="statLiked">0</span>
     </div>
     <div class="stat-row">
-      <span>Gecilen</span>
+      <span>Geçilen</span>
       <span class="stat-value" id="statSkipped">0</span>
     </div>
     <div class="stat-row">
-      <span>AI uretilen</span>
+      <span>AI üretilen</span>
       <span class="stat-value" id="statGenerated">0</span>
     </div>
     <div class="stat-row">
@@ -303,18 +303,18 @@
 
   <!-- Change PIN -->
   <div class="card">
-    <h2>PIN Degistir</h2>
+    <h2>PIN Değiştir</h2>
     <input type="password" class="pin-change-input" id="newPinInput" placeholder="Yeni PIN" maxlength="8">
-    <button class="save-btn" onclick="changePin()" style="margin-top:10px;">Degistir</button>
+    <button class="save-btn" onclick="changePin()" style="margin-top:10px;">Değiştir</button>
     <div class="msg" id="pinMsg"></div>
   </div>
 
   <!-- Reset -->
   <div class="card">
-    <h2>Sifirla</h2>
-    <button class="danger-btn" onclick="resetAnswers()" style="margin-bottom:10px;">Yanitlari Sifirla (Tekrar Oyna)</button>
+    <h2>Sıfırla</h2>
+    <button class="danger-btn" onclick="resetAnswers()" style="margin-bottom:10px;">Yanıtları Sıfırla (Tekrar Oyna)</button>
     <div class="msg" id="playedMsg"></div>
-    <button class="danger-btn" onclick="resetHistory()">Tum Gecmisi Sil</button>
+    <button class="danger-btn" onclick="resetHistory()">Tüm Geçmişi Sil</button>
     <div class="msg" id="resetMsg"></div>
   </div>
 </div>
@@ -408,7 +408,7 @@ function updateToggleUI() {
     status.style.color = '#4ecdc4';
   } else {
     toggle.classList.remove('active');
-    status.textContent = 'Kapali';
+    status.textContent = 'Kapalı';
     status.style.color = '';
   }
 }
@@ -433,8 +433,8 @@ function updateModeUI() {
     desc.style.color = '#4ecdc4';
   } else {
     toggle.classList.remove('active');
-    label.textContent = 'Egit';
-    desc.textContent = 'Soru secme ve havuz olusturma';
+    label.textContent = 'Eğit';
+    desc.textContent = 'Soru seçme ve havuz oluşturma';
     desc.style.color = '';
   }
 }
@@ -448,7 +448,7 @@ async function saveApiKey() {
 
   if (!key) {
     msg.className = 'msg error';
-    msg.textContent = 'Key bos olamaz';
+    msg.textContent = 'Key boş olamaz';
     return;
   }
 
@@ -473,7 +473,7 @@ async function changePin() {
 
   await sb.from('game_config').update({ admin_pin: newPin }).eq('id', 1);
   msg.className = 'msg success';
-  msg.textContent = 'PIN degistirildi!';
+  msg.textContent = 'PIN değiştirildi!';
   document.getElementById('newPinInput').value = '';
   setTimeout(() => msg.className = 'msg', 2000);
 }
@@ -485,17 +485,17 @@ async function resetAnswers() {
   await sb.from('interactions').update({ answered_by: null }).neq('id', 0);
   const msg = document.getElementById('playedMsg');
   msg.className = 'msg success';
-  msg.textContent = 'Tum yanitlar sifirlandi, tekrar oynayabilirsiniz!';
+  msg.textContent = 'Tüm yanıtlar sıfırlandı, tekrar oynayabilirsiniz!';
   setTimeout(() => msg.className = 'msg', 2000);
 }
 
 async function resetHistory() {
-  if (!confirm('Tum soru gecmisi silinecek. Emin misin?')) return;
+  if (!confirm('Tüm soru geçmişi silinecek. Emin misin?')) return;
 
   await sb.from('interactions').delete().neq('id', 0);
   const msg = document.getElementById('resetMsg');
   msg.className = 'msg success';
-  msg.textContent = 'Gecmis silindi!';
+  msg.textContent = 'Geçmiş silindi!';
   setTimeout(() => { msg.className = 'msg'; loadAdmin(); }, 2000);
 }
 </script>

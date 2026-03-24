@@ -205,23 +205,20 @@
       color: var(--text-muted);
     }
 
-    /* Answer badges on card (play mode) */
-    .answer-badges {
+    /* Answered info on card */
+    .answered-info {
       position: absolute;
-      bottom: 16px; right: 16px;
-      display: flex;
-      gap: 6px;
+      bottom: 16px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 500;
+      opacity: 0.6;
     }
 
-    .answer-badge {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      opacity: 0.3;
-    }
-
-    .answer-badge.filled { opacity: 1; }
-    .answer-badge.ab-pink { background: var(--pink); }
-    .answer-badge.ab-blue { background: var(--blue); }
+    .answered-info.pink { color: var(--pink); }
+    .answered-info.blue { color: var(--blue); }
 
     .card .question-text {
       font-family: 'Playfair Display', serif;
@@ -430,7 +427,7 @@
 <div class="inactive-overlay" id="inactiveOverlay" style="display:none;">
   <div class="heart">&#10084;&#65039;</div>
   <h2>Derin Sorular</h2>
-  <p>Oyun henuz aktif degil.<br>Biraz sabir, birazdan basliyoruz...</p>
+  <p>Oyun henüz aktif değil.<br>Biraz sabır, birazdan başlıyoruz...</p>
 </div>
 
 <!-- GAME -->
@@ -446,7 +443,7 @@
   <!-- Categories (train mode only) -->
   <div class="categories" id="categories">
     <div class="cat-pill active" data-cat="romantic" onclick="toggleCategory(this)">Romantik</div>
-    <div class="cat-pill active" data-cat="fun" onclick="toggleCategory(this)">Eglenceli</div>
+    <div class="cat-pill active" data-cat="fun" onclick="toggleCategory(this)">Eğlenceli</div>
     <div class="cat-pill active" data-cat="deep" onclick="toggleCategory(this)">Derin</div>
     <div class="cat-pill active" data-cat="bold" onclick="toggleCategory(this)">Cesur</div>
     <div class="cat-pill active" data-cat="nostalgic" onclick="toggleCategory(this)">Nostaljik</div>
@@ -458,21 +455,18 @@
     <div class="card" id="questionCard">
       <div class="cat-badge" id="catBadge"></div>
       <div class="question-number" id="questionNumber"></div>
-      <div class="question-text" id="questionText">Yukleniyor...</div>
+      <div class="question-text" id="questionText">Yükleniyor...</div>
       <div class="hint" id="questionHint"></div>
       <div class="loading"></div>
-      <!-- Answer status badges (play mode) -->
-      <div class="answer-badges" id="answerBadges" style="display:none;">
-        <div class="answer-badge ab-pink" id="badgePink"></div>
-        <div class="answer-badge ab-blue" id="badgeBlue"></div>
-      </div>
+      <!-- Who answered indicator -->
+      <div class="answered-info" id="answeredInfo" style="display:none;"></div>
       <!-- Stick figure -->
       <div class="stick-figure" id="stickFigure" style="display:none;"></div>
       <!-- Edit overlay -->
       <div class="edit-overlay" id="editOverlay">
         <textarea id="editTextarea"></textarea>
         <div class="edit-actions">
-          <button class="edit-btn cancel" onclick="cancelEdit()">Vazgec</button>
+          <button class="edit-btn cancel" onclick="cancelEdit()">Vazgeç</button>
           <button class="edit-btn save" onclick="saveEdit()">Kaydet</button>
         </div>
       </div>
@@ -482,25 +476,21 @@
 
   <!-- Train mode actions -->
   <div class="actions" id="trainActions">
-    <button class="action-btn btn-skip" onclick="handleAction('skipped')" title="Gec">&#10060;</button>
-    <button class="action-btn btn-edit small" onclick="openEdit()" title="Duzenle">&#9998;&#65039;</button>
-    <button class="action-btn btn-generate small" onclick="generateQuestion()" title="AI Soru Uret">&#10024;</button>
+    <button class="action-btn btn-skip" onclick="handleAction('skipped')" title="Geç">&#10060;</button>
+    <button class="action-btn btn-edit small" onclick="openEdit()" title="Düzenle">&#9998;&#65039;</button>
+    <button class="action-btn btn-generate small" onclick="generateQuestion()" title="AI Soru Üret">&#10024;</button>
     <button class="action-btn btn-like" onclick="handleAction('liked')" title="Havuza Ekle">&#10084;&#65039;</button>
   </div>
 
   <!-- Play mode actions -->
   <div class="actions" id="playActions" style="display:none;">
-    <button class="action-btn btn-pass" onclick="playSkip()" title="Simdilik Gec">
+    <button class="action-btn btn-pass" onclick="playSkip()" title="Şimdilik Geç">
       &#10145;&#65039;
-      <span class="btn-label">Simdilik Gec</span>
+      <span class="btn-label">Şimdilik Geç</span>
     </button>
     <button class="action-btn btn-answered" id="btnAnswered" onclick="playAnswered(currentTurn)">
       &#10084;&#65039;
-      <span class="btn-label" id="btnAnsweredLabel">Yanitladim</span>
-    </button>
-    <button class="action-btn btn-done" onclick="playDone()" title="Bir daha sorma">
-      &#10003;
-      <span class="btn-label">Bir Daha Sorma</span>
+      <span class="btn-label" id="btnAnsweredLabel">Yanıtladım</span>
     </button>
   </div>
 
@@ -521,106 +511,106 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ============================================
 const QUESTIONS = [
   // Romantik
-  { text: "Beni ilk gordugunde aklından ne gecti?", category: "romantic", hint: "Ilk izlenimler her zaman ozeldir" },
-  { text: "Sence iliskimizin en guclu yani ne?", category: "romantic", hint: "Birbirinizi neyle tamamliyorsunuz?" },
-  { text: "Hangi anımız seni en cok mutlu etti?", category: "romantic", hint: "Gozlerini kapat ve hatirla" },
-  { text: "Bana hic yazamadıgın bir mektup olsaydı, ne yazardın?", category: "romantic", hint: "Kelimeler bazen zor gelir" },
-  { text: "Benimle ilgili en cok neyimi ozlersin?", category: "romantic", hint: "Mesafe olsa bile..." },
-  { text: "Seninle en rahat hissettigim an ne zamandı biliyor musun?", category: "romantic", hint: "Huzurun tarifi" },
-  { text: "Benim sana soyledigim hangi soz seni en cok etkiledi?", category: "romantic", hint: "Bazen bir cumle her seyi degistirir" },
-  { text: "Eger bana bir sarki adayacak olsan hangisini secerdin?", category: "romantic", hint: "Muzik ruhun aynasıdır" },
-  { text: "Beni dusundugunde aklına gelen ilk his ne?", category: "romantic", hint: "Hisler kelimelerden once gelir" },
-  { text: "Iliskimizde en cok hangi kucuk detay seni mutlu ediyor?", category: "romantic", hint: "Kucuk seyler buyuk fark yaratır" },
-  { text: "Birlikte yaslandigimizda nasıl bir hayat hayal ediyorsun?", category: "romantic", hint: "Gelecege birlikte bakmak" },
-  { text: "Sence ask nedir, tek cumlede anlatabilir misin?", category: "romantic", hint: "Herkesin tanımı farklıdır" },
-  { text: "Bana sarılınca ne hissediyorsun?", category: "romantic", hint: "Sarılmak bazen her seyden degerli" },
-  { text: "Benimle gecirdigin en romantik an hangisiydi?", category: "romantic", hint: "Film sahnesi gibi anlar" },
-  { text: "Beni hayatında ne zaman en cok ihtiyac duydun?", category: "romantic", hint: "Bazen varlık en buyuk hediyedir" },
-  { text: "Birbirimize soylemedik bir sey kaldı mı sence?", category: "romantic", hint: "Acıklık iliskiyi buyutur" },
-  { text: "Seni en cok ne zaman sevdigimi hissettin?", category: "romantic", hint: "Hissetmek ile bilmek arasında" },
+  { text: "Beni ilk gördüğünde aklından ne geçti?", category: "romantic", hint: "İlk izlenimler her zaman özeldir" },
+  { text: "Sence ilişkimizin en güçlü yanı ne?", category: "romantic", hint: "Birbirinizi neyle tamamlıyorsunuz?" },
+  { text: "Hangi anımız seni en çok mutlu etti?", category: "romantic", hint: "Gözlerini kapat ve hatırla" },
+  { text: "Bana hiç yazamadığın bir mektup olsaydı, ne yazardın?", category: "romantic", hint: "Kelimeler bazen zor gelir" },
+  { text: "Benimle ilgili en çok neyimi özlersin?", category: "romantic", hint: "Mesafe olsa bile..." },
+  { text: "Seninle en rahat hissettiğim an ne zamandı biliyor musun?", category: "romantic", hint: "Huzurun tarifi" },
+  { text: "Benim sana söylediğim hangi söz seni en çok etkiledi?", category: "romantic", hint: "Bazen bir cümle her şeyi değiştirir" },
+  { text: "Eğer bana bir şarkı adayacak olsan hangisini seçerdin?", category: "romantic", hint: "Müzik ruhun aynasıdır" },
+  { text: "Beni düşündüğünde aklına gelen ilk his ne?", category: "romantic", hint: "Hisler kelimelerden önce gelir" },
+  { text: "İlişkimizde en çok hangi küçük detay seni mutlu ediyor?", category: "romantic", hint: "Küçük şeyler büyük fark yaratır" },
+  { text: "Birlikte yaşlandığımızda nasıl bir hayat hayal ediyorsun?", category: "romantic", hint: "Geleceğe birlikte bakmak" },
+  { text: "Sence aşk nedir, tek cümlede anlatabilir misin?", category: "romantic", hint: "Herkesin tanımı farklıdır" },
+  { text: "Bana sarılınca ne hissediyorsun?", category: "romantic", hint: "Sarılmak bazen her şeyden değerli" },
+  { text: "Benimle geçirdiğin en romantik an hangisiydi?", category: "romantic", hint: "Film sahnesi gibi anlar" },
+  { text: "Beni hayatında ne zaman en çok ihtiyaç duydun?", category: "romantic", hint: "Bazen varlık en büyük hediyedir" },
+  { text: "Birbirimize söylemedik bir şey kaldı mı sence?", category: "romantic", hint: "Açıklık ilişkiyi büyütür" },
+  { text: "Seni en çok ne zaman sevdiğimi hissettin?", category: "romantic", hint: "Hissetmek ile bilmek arasında" },
 
-  // Eglenceli
-  { text: "Eger bir gun boyunca gorunmez olsaydın ne yapardın?", category: "fun", hint: "Sınırsız ozgurluk!" },
-  { text: "Benim en komik huyum ne sence?", category: "fun", hint: "Gulumseyerek dusun" },
-  { text: "Birlikte cildirca bir maceraya atılsak ne yapalım?", category: "fun", hint: "Sınır yok!" },
+  // Eğlenceli
+  { text: "Eğer bir gün boyunca görünmez olsaydın ne yapardın?", category: "fun", hint: "Sınırsız özgürlük!" },
+  { text: "Benim en komik huyum ne sence?", category: "fun", hint: "Gülümseyerek düşün" },
+  { text: "Birlikte çılgınca bir maceraya atılsak ne yapalım?", category: "fun", hint: "Sınır yok!" },
   { text: "Beni bir hayvan olarak hayal etsen ne olurdum?", category: "fun", hint: "Yaratıcı ol!" },
-  { text: "Dunyada sadece bir yemek yiyebilsen ne yerdin?", category: "fun", hint: "Zor secim!" },
-  { text: "Eger bir supergucun olsaydi ne olmasını isterdin?", category: "fun", hint: "Hayal gucunu kullan" },
-  { text: "Benim hakkımda kimsenin bilmedigi komik bir sey soyle?", category: "fun", hint: "Sirlar eglencelidir" },
+  { text: "Dünyada sadece bir yemek yiyebilsen ne yerdin?", category: "fun", hint: "Zor seçim!" },
+  { text: "Eğer bir süper gücün olsaydı ne olmasını isterdin?", category: "fun", hint: "Hayal gücünü kullan" },
+  { text: "Benim hakkımda kimsenin bilmediği komik bir şey söyle?", category: "fun", hint: "Sırlar eğlencelidir" },
   { text: "Birlikte bir reality show'a katılsak hangisine gireriz?", category: "fun", hint: "Survivor mı, MasterChef mi?" },
-  { text: "Eger bir gun icinde hayat degistirsek, benim hayatımda ilk ne yapardın?", category: "fun", hint: "Freaky Friday!" },
-  { text: "Benim en garip aliskanlıgım sence ne?", category: "fun", hint: "Herkesin tuhaflıkları var" },
-  { text: "Eger beraber bir YouTube kanali acsak ne hakkında olurdu?", category: "fun", hint: "Icerik uretici modunda" },
-  { text: "Dunya yarın bitecek olsa bugun ne yapalım?", category: "fun", hint: "Son 24 saat!" },
-  { text: "Bana verebilecegin en sacma lakap ne olurdu?", category: "fun", hint: "Ne kadar sacma o kadar iyi" },
-  { text: "Ikimizin beraber yapacagı en epik prank ne olurdu?", category: "fun", hint: "Seytan tuyu" },
-  { text: "Eger ikimiz bir film karakteri olsak kimler olurduk?", category: "fun", hint: "Romantik komedi mi, aksiyon mu?" },
-  { text: "Bir zaman makinen olsa hangi anımıza geri donerdin?", category: "fun", hint: "Tekrar yasamak istedigin an" },
+  { text: "Eğer bir gün içinde hayat değiştirsek, benim hayatımda ilk ne yapardın?", category: "fun", hint: "Freaky Friday!" },
+  { text: "Benim en garip alışkanlığım sence ne?", category: "fun", hint: "Herkesin tuhaflıkları var" },
+  { text: "Eğer beraber bir YouTube kanalı açsak ne hakkında olurdu?", category: "fun", hint: "İçerik üretici modunda" },
+  { text: "Dünya yarın bitecek olsa bugün ne yapalım?", category: "fun", hint: "Son 24 saat!" },
+  { text: "Bana verebileceğin en saçma lakap ne olurdu?", category: "fun", hint: "Ne kadar saçma o kadar iyi" },
+  { text: "İkimizin beraber yapacağı en epik prank ne olurdu?", category: "fun", hint: "Şeytan tüyü" },
+  { text: "Eğer ikimiz bir film karakteri olsak kimler olurduk?", category: "fun", hint: "Romantik komedi mi, aksiyon mu?" },
+  { text: "Bir zaman makinen olsa hangi anımıza geri dönerdin?", category: "fun", hint: "Tekrar yaşamak istediğin an" },
 
   // Derin
-  { text: "Hayatında en cok pismanlık duydugun sey ne?", category: "deep", hint: "Gecmisle yuzlesmek cesaret ister" },
-  { text: "Seni en cok ne korkutuyor?", category: "deep", hint: "Korkularımız bizi sekillendirir" },
-  { text: "Kendini en yalniz hissettigin an ne zamandı?", category: "deep", hint: "Yalnızlık bazen kalabalıkta olur" },
-  { text: "Hayattan en buyuk beklentin ne?", category: "deep", hint: "Buyuk resme bak" },
-  { text: "Cocuklugundaki hangi ani seni bugunki sen yaptı?", category: "deep", hint: "Kokler derinlerde" },
-  { text: "Hic kimseye soyleyemedigin bir hayalin var mı?", category: "deep", hint: "Gizli hayaller en guclulerdir" },
-  { text: "Kendinde en cok neyi degistirmek isterdin?", category: "deep", hint: "Ozeleştiri ile ozsevgi arasında" },
-  { text: "Sence mutluluk bir hedef mi yoksa bir yolculuk mu?", category: "deep", hint: "Felsefi dusunme zamani" },
-  { text: "Ailenden aldıgın en degerli ders ne?", category: "deep", hint: "Aile bazen en iyi ogretmendir" },
-  { text: "Eger tum dunyaya tek bir mesaj bırakacak olsan ne derdin?", category: "deep", hint: "Mirasin ne olsun?" },
-  { text: "Hayatında en cok kimi affetmekte zorlandın?", category: "deep", hint: "Affetmek kendini ozgur kılmaktır" },
-  { text: "Olumden korkuyor musun, neden?", category: "deep", hint: "Hayatın en buyuk sorusu" },
-  { text: "Sence insanlar gercekten degisebilir mi?", category: "deep", hint: "Degisim uzerine dusun" },
-  { text: "Hangi duyguyu en cok bastiriyorsun?", category: "deep", hint: "Bastırılan duygular en guclulerdir" },
-  { text: "Eger butun anılarını kaybetsen, hangisini geri isterdin?", category: "deep", hint: "En degerli an" },
-  { text: "Kendini en guclu hissettigin an ne zamandı?", category: "deep", hint: "Guc her zaman fiziksel degildir" },
+  { text: "Hayatında en çok pişmanlık duyduğun şey ne?", category: "deep", hint: "Geçmişle yüzleşmek cesaret ister" },
+  { text: "Seni en çok ne korkutuyor?", category: "deep", hint: "Korkularımız bizi şekillendirir" },
+  { text: "Kendini en yalnız hissettiğin an ne zamandı?", category: "deep", hint: "Yalnızlık bazen kalabalıkta olur" },
+  { text: "Hayattan en büyük beklentin ne?", category: "deep", hint: "Büyük resme bak" },
+  { text: "Çocukluğundaki hangi anı seni bugünkü sen yaptı?", category: "deep", hint: "Kökler derinlerde" },
+  { text: "Hiç kimseye söyleyemediğin bir hayalin var mı?", category: "deep", hint: "Gizli hayaller en güçlüleridir" },
+  { text: "Kendinde en çok neyi değiştirmek isterdin?", category: "deep", hint: "Özeleştiri ile özsevgi arasında" },
+  { text: "Sence mutluluk bir hedef mi yoksa bir yolculuk mu?", category: "deep", hint: "Felsefi düşünme zamanı" },
+  { text: "Ailenden aldığın en değerli ders ne?", category: "deep", hint: "Aile bazen en iyi öğretmendir" },
+  { text: "Eğer tüm dünyaya tek bir mesaj bırakacak olsan ne derdin?", category: "deep", hint: "Mirasın ne olsun?" },
+  { text: "Hayatında en çok kimi affetmekte zorlandın?", category: "deep", hint: "Affetmek kendini özgür kılmaktır" },
+  { text: "Ölümden korkuyor musun, neden?", category: "deep", hint: "Hayatın en büyük sorusu" },
+  { text: "Sence insanlar gerçekten değişebilir mi?", category: "deep", hint: "Değişim üzerine düşün" },
+  { text: "Hangi duyguyu en çok bastırıyorsun?", category: "deep", hint: "Bastırılan duygular en güçlüleridir" },
+  { text: "Eğer bütün anılarını kaybetsen, hangisini geri isterdin?", category: "deep", hint: "En değerli an" },
+  { text: "Kendini en güçlü hissettiğin an ne zamandı?", category: "deep", hint: "Güç her zaman fiziksel değildir" },
 
   // Cesur
-  { text: "Benim hakkımda merak ettigin ama soramadıgın bir sey var mi?", category: "bold", hint: "Simdi tam zamanı" },
-  { text: "Iliskimizde seni en cok rahatsiz eden sey ne?", category: "bold", hint: "Durstuluk iyilestirir" },
-  { text: "Hic benden sıkıldıgın oldu mu?", category: "bold", hint: "Cesur cevaplar icin cesur sorular" },
-  { text: "Baska birinden hoslandigın oldu mu iliskimiz sırasında?", category: "bold", hint: "Durstuluk iliskiyi guclendirir" },
-  { text: "Benim hangi davranışım seni en cok kızdırıyor?", category: "bold", hint: "Yapıcı elestiri zamani" },
-  { text: "Eger bir gun bensiz daha mutlu olacagını dusunsen, ne yapardın?", category: "bold", hint: "Zor bir soru, dusun" },
-  { text: "Hic bana yalan soyleydin mi?", category: "bold", hint: "Durstuluk anı" },
-  { text: "Benimle ilgili degistirmek istedigin bir sey var mı?", category: "bold", hint: "Acık ol" },
-  { text: "Sence iliskimizin en zayif noktasi ne?", category: "bold", hint: "Zayıflıkları bilmek guclendirir" },
-  { text: "Hayatında benden once en cok kimi sevdin?", category: "bold", hint: "Gecmis iliskiler bizi sekillendirir" },
-  { text: "Eger bir gun tartismasiz ayrilsak, beni ne ile hatırlardın?", category: "bold", hint: "Kalıcı izler" },
-  { text: "Sence yeterince ilgi gosteriyor muyum?", category: "bold", hint: "Geribildirim onemli" },
-  { text: "Beni ailenle/arkadaslarınla kıyaslıyor musun bazen?", category: "bold", hint: "Kıyaslama uzerine" },
-  { text: "Iliskimizde en cok neyden vazgectin?", category: "bold", hint: "Fedakarlıklar" },
+  { text: "Benim hakkımda merak ettiğin ama soramadığın bir şey var mı?", category: "bold", hint: "Şimdi tam zamanı" },
+  { text: "İlişkimizde seni en çok rahatsız eden şey ne?", category: "bold", hint: "Dürüstlük iyileştirir" },
+  { text: "Hiç benden sıkıldığın oldu mu?", category: "bold", hint: "Cesur cevaplar için cesur sorular" },
+  { text: "Başka birinden hoşlandığın oldu mu ilişkimiz sırasında?", category: "bold", hint: "Dürüstlük ilişkiyi güçlendirir" },
+  { text: "Benim hangi davranışım seni en çok kızdırıyor?", category: "bold", hint: "Yapıcı eleştiri zamanı" },
+  { text: "Eğer bir gün bensiz daha mutlu olacağını düşünsen, ne yapardın?", category: "bold", hint: "Zor bir soru, düşün" },
+  { text: "Hiç bana yalan söyledin mi?", category: "bold", hint: "Dürüstlük anı" },
+  { text: "Benimle ilgili değiştirmek istediğin bir şey var mı?", category: "bold", hint: "Açık ol" },
+  { text: "Sence ilişkimizin en zayıf noktası ne?", category: "bold", hint: "Zayıflıkları bilmek güçlendirir" },
+  { text: "Hayatında benden önce en çok kimi sevdin?", category: "bold", hint: "Geçmiş ilişkiler bizi şekillendirir" },
+  { text: "Eğer bir gün tartışmasız ayrılsak, beni ne ile hatırlardın?", category: "bold", hint: "Kalıcı izler" },
+  { text: "Sence yeterince ilgi gösteriyor muyum?", category: "bold", hint: "Geribildirim önemli" },
+  { text: "Beni ailenle/arkadaşlarınla kıyaslıyor musun bazen?", category: "bold", hint: "Kıyaslama üzerine" },
+  { text: "İlişkimizde en çok neyden vazgeçtin?", category: "bold", hint: "Fedakârlıklar" },
 
   // Nostaljik
-  { text: "Cocukken buyuyunce ne olmak istiyordun?", category: "nostalgic", hint: "Cocukluk hayalleri" },
-  { text: "Seni en cok etkileyen cocukluk anin hangisi?", category: "nostalgic", hint: "Hafıza seridine yolculuk" },
-  { text: "Ilk askin kimdi ve nasıl bitti?", category: "nostalgic", hint: "Ilk heyecanlar" },
-  { text: "Cocukken en cok sevdigin oyun neydi?", category: "nostalgic", hint: "O zamanlar her sey daha basitti" },
-  { text: "Hayatında donup tekrar yasamak istedigin bir donem var mi?", category: "nostalgic", hint: "Altın caglar" },
-  { text: "Annen/baban sana hep ne derdi?", category: "nostalgic", hint: "Ebeveyn sozleri kalıcıdır" },
-  { text: "Okul yillarından en cok neyi ozluyorsun?", category: "nostalgic", hint: "Okul gunleri" },
-  { text: "Gecmisine bir mektup yazsaydın, ne derdin?", category: "nostalgic", hint: "Gecmisteki sana tavsiyeler" },
-  { text: "Ilk kalp kırıklıgın nasıl oldu?", category: "nostalgic", hint: "Kırılmak da buyumektir" },
-  { text: "Eski bir arkadasini ozluyor musun? Kim?", category: "nostalgic", hint: "Kaybolan dostluklar" },
+  { text: "Çocukken büyüyünce ne olmak istiyordun?", category: "nostalgic", hint: "Çocukluk hayalleri" },
+  { text: "Seni en çok etkileyen çocukluk anın hangisi?", category: "nostalgic", hint: "Hafıza şeridine yolculuk" },
+  { text: "İlk aşkın kimdi ve nasıl bitti?", category: "nostalgic", hint: "İlk heyecanlar" },
+  { text: "Çocukken en çok sevdiğin oyun neydi?", category: "nostalgic", hint: "O zamanlar her şey daha basitti" },
+  { text: "Hayatında dönüp tekrar yaşamak istediğin bir dönem var mı?", category: "nostalgic", hint: "Altın çağlar" },
+  { text: "Annen/baban sana hep ne derdi?", category: "nostalgic", hint: "Ebeveyn sözleri kalıcıdır" },
+  { text: "Okul yıllarından en çok neyi özlüyorsun?", category: "nostalgic", hint: "Okul günleri" },
+  { text: "Geçmişine bir mektup yazsaydın, ne derdin?", category: "nostalgic", hint: "Geçmişteki sana tavsiyeler" },
+  { text: "İlk kalp kırıklığın nasıl oldu?", category: "nostalgic", hint: "Kırılmak da büyümektir" },
+  { text: "Eski bir arkadaşını özlüyor musun? Kim?", category: "nostalgic", hint: "Kaybolan dostluklar" },
   { text: "Hayatının en unutulmaz yazı hangisiydi?", category: "nostalgic", hint: "Yaz anıları" },
-  { text: "Seni en cok etkileyen ogretmenin kimdi?", category: "nostalgic", hint: "Hayat dersleri" },
-  { text: "Cocukken en cok korktugon sey neydi?", category: "nostalgic", hint: "Cocukluk korkuları" },
+  { text: "Seni en çok etkileyen öğretmenin kimdi?", category: "nostalgic", hint: "Hayat dersleri" },
+  { text: "Çocukken en çok korktuğun şey neydi?", category: "nostalgic", hint: "Çocukluk korkuları" },
 
   // Hayal
-  { text: "Eger para sorun olmasaydı, nerede yasardın?", category: "dream", hint: "Ruyalar sınırsız" },
-  { text: "Bir yıl boyunca her seyi bırakıp ne yapmak isterdin?", category: "dream", hint: "Ozgurluk senaryosu" },
-  { text: "Gelecekte kendini nerede goruyorsun?", category: "dream", hint: "10 yil sonra" },
-  { text: "Eger bir kitap yazacak olsan ne hakkında olurdu?", category: "dream", hint: "Herkesin bir hikayesi var" },
-  { text: "Ruya evin nasıl olurdu?", category: "dream", hint: "Detaylı hayal kur" },
-  { text: "Eger bir gun her seyi bırakıp gitsek, nereye gideriz?", category: "dream", hint: "Birlikte kacis plani" },
-  { text: "Cocuklarimiz olsa nasil bir ebeveyn olmak isterdin?", category: "dream", hint: "Gelecek nesil" },
-  { text: "Eger bir mucize gerceklescek olsa, ne olmasını isterdin?", category: "dream", hint: "Tek bir dilek" },
-  { text: "Hayalindeki tatil nasıl bir sey?", category: "dream", hint: "Ruya tatili planla" },
-  { text: "Eger butun yeteneklere sahip olsaydın, ne yapardın?", category: "dream", hint: "Sınırsız yetenek" },
-  { text: "Birlikte kurmak istedigin bir is/proje var mi?", category: "dream", hint: "Ortak ruyalar" },
-  { text: "Eger zamanda yolculuk yapabilsen, hangi doneme giderdin?", category: "dream", hint: "Gecmis mi gelecek mi?" },
-  { text: "Hayalindeki yasam temposu nasıl?", category: "dream", hint: "Hızlı mı, sakin mi?" },
-  { text: "Dunyaya bir iz bırakacak olsan, nasıl bir iz olsun?", category: "dream", hint: "Kalıcı miras" },
+  { text: "Eğer para sorun olmasaydı, nerede yaşardın?", category: "dream", hint: "Rüyalar sınırsız" },
+  { text: "Bir yıl boyunca her şeyi bırakıp ne yapmak isterdin?", category: "dream", hint: "Özgürlük senaryosu" },
+  { text: "Gelecekte kendini nerede görüyorsun?", category: "dream", hint: "10 yıl sonra" },
+  { text: "Eğer bir kitap yazacak olsan ne hakkında olurdu?", category: "dream", hint: "Herkesin bir hikâyesi var" },
+  { text: "Rüya evin nasıl olurdu?", category: "dream", hint: "Detaylı hayal kur" },
+  { text: "Eğer bir gün her şeyi bırakıp gitsek, nereye gideriz?", category: "dream", hint: "Birlikte kaçış planı" },
+  { text: "Çocuklarımız olsa nasıl bir ebeveyn olmak isterdin?", category: "dream", hint: "Gelecek nesil" },
+  { text: "Eğer bir mucize gerçekleşecek olsa, ne olmasını isterdin?", category: "dream", hint: "Tek bir dilek" },
+  { text: "Hayalindeki tatil nasıl bir şey?", category: "dream", hint: "Rüya tatili planla" },
+  { text: "Eğer bütün yeteneklere sahip olsaydın, ne yapardın?", category: "dream", hint: "Sınırsız yetenek" },
+  { text: "Birlikte kurmak istediğin bir iş/proje var mı?", category: "dream", hint: "Ortak rüyalar" },
+  { text: "Eğer zamanda yolculuk yapabilsen, hangi döneme giderdin?", category: "dream", hint: "Geçmiş mi gelecek mi?" },
+  { text: "Hayalindeki yaşam temposu nasıl?", category: "dream", hint: "Hızlı mı, sakin mi?" },
+  { text: "Dünyaya bir iz bırakacak olsan, nasıl bir iz olsun?", category: "dream", hint: "Kalıcı miras" },
 ];
 
 // ============================================
@@ -644,7 +634,7 @@ let currentTurn = 'pink'; // 'pink' or 'blue'
 let currentPlayQuestion = null; // current question with DB id & answered_by
 
 const CAT_LABELS = {
-  romantic: 'Romantik', fun: 'Eglenceli', deep: 'Derin',
+  romantic: 'Romantik', fun: 'Eğlenceli', deep: 'Derin',
   bold: 'Cesur', nostalgic: 'Nostaljik', dream: 'Hayal'
 };
 
@@ -683,16 +673,13 @@ function setupMode() {
   const playActions = document.getElementById('playActions');
   const categories = document.getElementById('categories');
   const turnInd = document.getElementById('turnIndicator');
-  const answerBadges = document.getElementById('answerBadges');
-
   if (gameMode === 'train') {
-    badge.textContent = 'Egit';
+    badge.textContent = 'Eğit';
     badge.className = 'mode-badge train';
     trainActions.style.display = 'flex';
     playActions.style.display = 'none';
     categories.style.display = 'flex';
     turnInd.style.display = 'none';
-    answerBadges.style.display = 'none';
     document.getElementById('statsLabel1').textContent = 'havuzda';
     document.getElementById('statsLabel2').textContent = 'toplam';
   } else {
@@ -700,7 +687,6 @@ function setupMode() {
     playActions.style.display = 'flex';
     categories.style.display = 'none';
     turnInd.style.display = 'block';
-    answerBadges.style.display = 'flex';
     document.getElementById('statsLabel1').textContent = 'kalan';
     document.getElementById('statsLabel2').textContent = 'tamamlanan';
     updateTurnUI();
@@ -739,25 +725,25 @@ function updateTurnUI() {
   stickFigure.style.display = 'block';
 
   if (currentTurn === 'pink') {
-    badge.textContent = 'Kiz\'in Sirasi';
+    badge.innerHTML = '&#128105; Sırası';
     badge.className = 'mode-badge play-pink';
-    turnInd.innerHTML = '&#10084;&#65039; Kiz yanitliyor';
+    turnInd.innerHTML = '&#128105; yanıtlıyor';
     turnInd.className = 'turn-indicator pink';
     card.classList.add('turn-pink');
     btnAnswered.style.borderColor = 'var(--pink)';
     btnAnswered.style.color = 'var(--pink)';
-    btnLabel.textContent = 'Kiz Yanitladi';
+    btnLabel.innerHTML = '&#128105; Yanıtladı';
     stickFigure.innerHTML = STICK_GIRL;
     stickFigure.style.color = 'var(--pink)';
   } else {
-    badge.textContent = 'Erkek\'in Sirasi';
+    badge.innerHTML = '&#128104; Sırası';
     badge.className = 'mode-badge play-blue';
-    turnInd.innerHTML = '&#128153; Erkek yanitliyor';
+    turnInd.innerHTML = '&#128104; yanıtlıyor';
     turnInd.className = 'turn-indicator blue';
     card.classList.add('turn-blue');
     btnAnswered.style.borderColor = 'var(--blue)';
     btnAnswered.style.color = 'var(--blue)';
-    btnLabel.textContent = 'Erkek Yanitladi';
+    btnLabel.innerHTML = '&#128104; Yanıtladı';
     stickFigure.innerHTML = STICK_BOY;
     stickFigure.style.color = 'var(--blue)';
   }
@@ -840,22 +826,52 @@ function showNextPlayQuestion() {
 
     currentPlayQuestion = null;
     document.getElementById('questionCard').classList.remove('turn-pink', 'turn-blue');
-    showCard({ text: "Tum sorular yanitlandi! Egit modundan yeni sorular ekle veya admin'den sifirla.", category: "romantic", hint: "" }, -1);
+    document.getElementById('stickFigure').style.display = 'none';
+    document.getElementById('answeredInfo').style.display = 'none';
+    document.getElementById('turnIndicator').style.display = 'none';
+    document.getElementById('modeBadge').textContent = 'Bitti';
+    document.getElementById('modeBadge').className = 'mode-badge train';
+    showEndCard();
     updateStats();
     return;
   }
 
   currentPlayQuestion = available[0];
   showCard(currentPlayQuestion, -1);
-  updateAnswerBadges();
+  updateAnsweredInfo();
   updateStats();
 }
 
-function updateAnswerBadges() {
-  if (!currentPlayQuestion || gameMode !== 'play') return;
+function updateAnsweredInfo() {
+  const info = document.getElementById('answeredInfo');
+  if (!currentPlayQuestion || gameMode !== 'play') {
+    info.style.display = 'none';
+    return;
+  }
   const ab = currentPlayQuestion.answered_by;
-  document.getElementById('badgePink').className = 'answer-badge ab-pink' + ((ab === 'pink' || ab === 'both') ? ' filled' : '');
-  document.getElementById('badgeBlue').className = 'answer-badge ab-blue' + ((ab === 'blue' || ab === 'both') ? ' filled' : '');
+  if (ab === 'pink') {
+    info.style.display = 'block';
+    info.className = 'answered-info pink';
+    info.innerHTML = '&#10003; &#128105; yanıtladı';
+  } else if (ab === 'blue') {
+    info.style.display = 'block';
+    info.className = 'answered-info blue';
+    info.innerHTML = '&#10003; &#128104; yanıtladı';
+  } else {
+    info.style.display = 'none';
+  }
+}
+
+function showEndCard() {
+  const card = document.getElementById('questionCard');
+  card.classList.remove('entering', 'swiping-left', 'swiping-right', 'generating', 'turn-pink', 'turn-blue');
+  card.style.borderColor = 'var(--accent)';
+  document.getElementById('questionText').innerHTML = '&#10024; Tüm sorular yanıtlandı!<br><br><span style="font-size:0.85rem;font-family:Inter,sans-serif;font-weight:400;color:var(--text-muted)">Eğit modundan yeni sorular ekle veya admin\'den sıfırla</span>';
+  document.getElementById('questionHint').textContent = '';
+  document.getElementById('questionNumber').textContent = '';
+  document.getElementById('catBadge').style.display = 'none';
+  document.getElementById('playActions').style.display = 'none';
+  requestAnimationFrame(() => card.classList.add('entering'));
 }
 
 async function playSkip() {
@@ -962,7 +978,7 @@ function nextQuestion() {
     if (geminiApiKey) {
       generateQuestion();
     } else {
-      showCard({ text: "Tum sorular bitti! AI soru uretmek icin admin panelinden Gemini API key ekle.", category: "deep", hint: "" }, -1);
+      showCard({ text: "Tüm sorular bitti! AI soru üretmek için admin panelinden Gemini API key ekle.", category: "deep", hint: "" }, -1);
     }
     return;
   }
@@ -1093,7 +1109,7 @@ function toggleCategory(el) {
 // ============================================
 async function generateQuestion() {
   if (!geminiApiKey || isGenerating) {
-    if (!geminiApiKey) alert('Gemini API key ayarlanmamis. Admin panelinden ekle.');
+    if (!geminiApiKey) alert('Gemini API key ayarlanmamış. Admin panelinden ekle.');
     return;
   }
 
@@ -1110,18 +1126,18 @@ async function generateQuestion() {
   const skippedQs = (recent || []).filter(i => i.action === 'skipped').map(i => `- ${i.question_text} (${i.category})`);
   const activeCats = Array.from(activeCategories).map(c => CAT_LABELS[c]).join(', ');
 
-  const prompt = `Sen ciftler icin soru ureten bir asistansın. Turkce sorular uretiyorsun.
+  const prompt = `Sen çiftler için soru üreten bir asistansın. Türkçe sorular üretiyorsun.
 
-Kullanicinin beğendiği sorular:
-${likedQs.join('\n') || '(henuz yok)'}
+Kullanıcının beğendiği sorular:
+${likedQs.join('\n') || '(henüz yok)'}
 
-Kullanicinin gectigi sorular:
-${skippedQs.join('\n') || '(henuz yok)'}
+Kullanıcının geçtiği sorular:
+${skippedQs.join('\n') || '(henüz yok)'}
 
 Aktif kategoriler: ${activeCats}
 
-Begendigi sorulara benzer ama tekrar etmeyen, yaratıcı ve samimi BIR TANE yeni soru uret.
-Cevabını SADECE su JSON formatında ver, baska hicbir sey yazma:
+Beğendiği sorulara benzer ama tekrar etmeyen, yaratıcı ve samimi BİR TANE yeni soru üret.
+Cevabını SADECE şu JSON formatında ver, başka hiçbir şey yazma:
 {"text": "soru metni", "category": "kategori_key", "hint": "kısa ipucu"}
 
 Kategori key'leri: romantic, fun, deep, bold, nostalgic, dream`;
